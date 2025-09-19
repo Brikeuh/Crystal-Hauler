@@ -1,2 +1,2 @@
-# Crystal-Hauler
-CodeCrank Studios Team Project for GATech CS6457 Fall '25
+# crystal-hauler
+This is the repo for the codecrank studio's team assignment
