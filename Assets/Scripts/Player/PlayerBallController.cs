@@ -55,8 +55,9 @@ public class PlayerBallController : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Crystal"))
+        if (other.gameObject.CompareTag("Crystal") )
         {
+            Debug.Log("Nom Nom Nom");
             other.gameObject.SetActive(false);
             count++;
             SetCountText();
@@ -67,12 +68,29 @@ public class PlayerBallController : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Enemy"))
         {
-            // Destroy the current object
-            Destroy(gameObject);
-            // Update the winText to display "You Lose!"
-            winTextObject.gameObject.SetActive(true);
-            winTextObject.GetComponent<TextMeshProUGUI>().color = Color.red;
-            winTextObject.GetComponent<TextMeshProUGUI>().text = "You Lose!";
+            if (count == 0)
+            {
+                // Destroy the current object
+                Destroy(gameObject);
+                // Update the winText to display "You Lose!"
+                winTextObject.gameObject.SetActive(true);
+                winTextObject.GetComponent<TextMeshProUGUI>().color = Color.red;
+                winTextObject.GetComponent<TextMeshProUGUI>().text = "You Lose!";
+            }
+            else if (count > 0)
+            {
+                if (collision.contacts.Length > 0) // Will replace this with a raycast in the future
+                {
+                    ContactPoint contact = collision.contacts[0];
+                    Vector3 collisionDirection = contact.normal; // This is the direction of impact on *this* object
+                    rb.AddForce(collisionDirection * 200f);
+                    Debug.Log("Collision Direction: " + collisionDirection);
+                }
+                count--;
+                SetCountText();
+            }
+            
+            
         }
     }
 
@@ -83,7 +101,7 @@ public class PlayerBallController : MonoBehaviour
 
     void SetCountText()
     {
-        countText.text = "Count: " + count.ToString();
+        countText.text = "Crystals: " + count.ToString();
         if (count >= 12)
         {
             winTextObject.SetActive(true);
