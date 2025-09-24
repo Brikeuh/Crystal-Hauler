@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -7,9 +8,12 @@ public class PlayerBallController : MonoBehaviour
 {
     private Rigidbody rb;
     public TextMeshProUGUI countText;
-    public GameObject winTextObject;
+    public GameObject winTextObject; // This is a gameobject because it needs to be activated/deactivated.
+    public TextMeshProUGUI scoreText;
 
     private int count;
+    private int score;
+    public bool isExtracting = false;
 
     private Vector3 jump;
     public float jumpForce = 1.0f;
@@ -27,6 +31,24 @@ public class PlayerBallController : MonoBehaviour
 
         SetCountText();
         winTextObject.SetActive(false);
+    }
+
+    IEnumerator DoExtracting(float countTime = 1f)
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(countTime);
+
+            count--;
+            SetCountText();
+
+            speed++;
+
+            score = score + 100;
+            SetScoreText();
+            Debug.Log("Score!");
+
+        }
     }
 
     void OnMove(InputValue movementValue)
@@ -53,16 +75,39 @@ public class PlayerBallController : MonoBehaviour
         }
     }
 
+    void OnTriggerStay(Collider other)
+    {
+        if (other.gameObject.CompareTag("Extractor") && count > 0)
+        {
+            StartCoroutine(DoExtracting());
+            Debug.Log("Extracting!");
+        }
+        else if(count <= 0)
+        {
+            StopAllCoroutines();
+        }
+    }
+
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Crystal") )
+        if (other.gameObject.CompareTag("Crystal"))
         {
             Debug.Log("Nom Nom Nom");
             other.gameObject.SetActive(false);
             count++;
+            speed--;
             SetCountText();
         }
     }
+
+    //void OnTriggerExit(Collider other)
+    //{
+    //    if (other.gameObject.CompareTag("Extractor"))
+    //    {
+    //        StopAllCoroutines();
+    //        Debug.Log("Leaving Extractor!");
+    //    }
+    //}
 
     void OnCollisionEnter(Collision collision)
     {
@@ -102,11 +147,20 @@ public class PlayerBallController : MonoBehaviour
     void SetCountText()
     {
         countText.text = "Crystals: " + count.ToString();
-        if (count >= 12)
+        //if (count >= 10)
+        //{
+        //    winTextObject.SetActive(true);
+        //    Destroy(GameObject.FindGameObjectWithTag("Enemy"));
+        //}
+
+    }
+    void SetScoreText()
+    {
+        scoreText.text = "Score: " + score.ToString();
+        if (score >= 1000)
         {
             winTextObject.SetActive(true);
             Destroy(GameObject.FindGameObjectWithTag("Enemy"));
         }
-
     }
 }
