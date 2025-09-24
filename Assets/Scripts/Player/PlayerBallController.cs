@@ -5,17 +5,19 @@ using UnityEngine.UI;
 
 public class PlayerBallController : MonoBehaviour
 {
-    public float speed = 30;
+    private Rigidbody rb;
     public TextMeshProUGUI countText;
     public GameObject winTextObject;
+
+    private int count;
+
     private Vector3 jump;
-    public float jumpForce = 3.0f;
+    public float jumpForce = 1.0f;
     private bool isGrounded;
 
-    private Rigidbody rb;
+    public float speed = 10;
     private float movementX;
     private float movementY;
-    private int count;
 
     void Start() 
     { 
@@ -69,6 +71,7 @@ public class PlayerBallController : MonoBehaviour
             Destroy(gameObject);
             // Update the winText to display "You Lose!"
             winTextObject.gameObject.SetActive(true);
+            winTextObject.GetComponent<TextMeshProUGUI>().color = Color.red;
             winTextObject.GetComponent<TextMeshProUGUI>().text = "You Lose!";
         }
     }
