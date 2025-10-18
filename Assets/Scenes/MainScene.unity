@@ -2502,8 +2502,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   walkSpeed: 2
   runSpeed: 4
+  jumpHeight: 3
   rotationRate: 15
-  playerGravity: -9.8
+  playerGravity: -9.81
 --- !u!143 &1182057265
 CharacterController:
   m_ObjectHideFlags: 0
@@ -2821,7 +2822,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f10600b0100bdb43b96811c23d14166, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 84956104}
+  player: {fileID: 1182057261}
 --- !u!4 &1262490088 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6642310306319865707, guid: 069773a5aa8c7394484df9323de9604d, type: 3}

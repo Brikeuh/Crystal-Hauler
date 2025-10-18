@@ -14,16 +14,17 @@ public class JammoPlayerController : MonoBehaviour
     private int isWalkingHash;
     private int isRunningHash;
 
-    private float speed = 2f;
+    private bool isPlayerGrounded;
 
     [Header("Player Attributes")]
     public float walkSpeed = 2f;
     public float runSpeed = 4f;
+    public float jumpHeight = 3f;
     public float rotationRate = 15.0f;
     public float playerGravity = -9.8f;
 
     CharacterController characterController;
-    Animator animator;
+    Animator animator;   
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -56,12 +57,10 @@ public class JammoPlayerController : MonoBehaviour
         if ((moveAction.IsPressed() && sprintAction.IsPressed()) && !isRunning)
         {
             animator.SetBool("isRunning", true);
-            speed = runSpeed;
         }
         else if ((!moveAction.IsPressed() || !sprintAction.IsPressed()) && isRunning)
         {
             animator.SetBool("isRunning", false);
-            speed = walkSpeed;
         }
     }
 
@@ -82,30 +81,52 @@ public class JammoPlayerController : MonoBehaviour
         }
     }
 
-    void HandleGravity()
+    void HandleJumpAndGravity()
     {
         if (characterController.isGrounded)
         {
             float groundedGravity = -0.05f;
             moveValue.y = groundedGravity;
+
+            if (jumpAction.IsPressed())
+            {
+                moveValue.y = jumpHeight;
+            }
         }
         else
         {
-            moveValue.y = playerGravity;
+            moveValue.y += playerGravity * Time.deltaTime;
+            if (moveValue.y < 0.01f && moveValue.y > -0.01f)
+            {
+                Debug.Log(moveValue.y);
+            }
         }
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (characterController.isGrounded && moveValue.y < 0)
+        {
+            moveValue.y = 0f;
+        }
+
         moveValueInput = moveAction.ReadValue<Vector2>();
         
         moveValue.x = moveValueInput.x;
         moveValue.z = moveValueInput.y;
 
-        HandleGravity();
+        HandleJumpAndGravity();
         HandleRotation();
         HandleAnimation();
-        characterController.Move(moveValue * speed * Time.deltaTime);
+
+        if (sprintAction.IsPressed())
+        {
+            characterController.Move(moveValue * runSpeed * Time.deltaTime);
+        }
+        else
+        {
+            characterController.Move(moveValue * walkSpeed * Time.deltaTime);
+        }
     }
 }
