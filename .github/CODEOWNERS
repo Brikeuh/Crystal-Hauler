@@ -1,0 +1,5 @@
+# CODEOWNERS
+# This file defines code ownership for automatic review requests and permissions.
+
+# Set the default owner for all files
+* @Brikeuh
