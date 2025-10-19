@@ -28,7 +28,8 @@ public class JammoPlayerController : MonoBehaviour
     public float playerGravity = -9.8f;
 
     CharacterController characterController;
-    Animator animator;   
+    Animator animator;
+    AnimatorStateInfo animatorStateInfo;
 
     void Start()
     {
@@ -105,7 +106,7 @@ public class JammoPlayerController : MonoBehaviour
             animator.SetBool("isGrounded", true);
         }
 
-        if (jumpAction.IsPressed() && characterController.isGrounded)
+        if (jumpAction.IsPressed() && characterController.isGrounded && CheckJumpState())
         {
             animator.SetBool("isJumping", true);
         }
@@ -139,7 +140,7 @@ public class JammoPlayerController : MonoBehaviour
             float groundedGravity = -0.05f;
             moveValue.y = groundedGravity;
 
-            if (jumpAction.IsPressed())
+            if (jumpAction.IsPressed() && CheckJumpState())
             {
                 moveValue.y = jumpHeight;
             }
@@ -150,9 +151,16 @@ public class JammoPlayerController : MonoBehaviour
         }
     }
 
+    bool CheckJumpState()
+    {
+        return animatorStateInfo.IsName("Base Layer.Run") || animatorStateInfo.IsName("Base Layer.Walk") || animatorStateInfo.IsName("Base Layer.Idle");
+    }
+
     // Update is called once per frame
     void Update()
     {
+        animatorStateInfo = animator.GetCurrentAnimatorStateInfo(0);
+
         // Handle player input and other calculations
         HandleMovement();
         HandleRotation();
