@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5050926698841900896}
   - component: {fileID: 3135142000403436588}
+  - component: {fileID: 4081577605321999257}
   m_Layer: 0
   m_Name: CartParent
   m_TagString: Extractor
@@ -52,8 +53,20 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 3
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Radius: 2.5
+  m_Center: {x: 0, y: -0.6, z: 0}
+--- !u!114 &4081577605321999257
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1110485461431485249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39ca1d521fa24c94d8ab29efd37b3753, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &8505685886066289451
 PrefabInstance:
   m_ObjectHideFlags: 0
