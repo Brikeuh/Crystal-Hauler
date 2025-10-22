@@ -8,6 +8,7 @@ TagManager:
   - Crystal
   - Enemy
   - Extractor
+  - LoadCircle
   layers:
   - Default
   - TransparentFX

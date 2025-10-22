@@ -7,6 +7,7 @@ public class JammoPlayerController : MonoBehaviour
     InputAction moveAction;
     InputAction jumpAction;
     InputAction sprintAction;
+    InputAction interactAction;
 
     Vector3 moveValue;
     Vector2 moveValueInput;
@@ -18,14 +19,16 @@ public class JammoPlayerController : MonoBehaviour
     private int isJumpingHash;
 
     private float speed;
+    private float speedModifier;
     private float fallAfterJumpThreshold; // Determines when the player begins to fall after jumping.
 
     [Header("Player Attributes")]
     public float walkSpeed = 2f;
     public float runSpeed = 4f;
-    public float jumpHeight = 8f;
+    public float jumpHeight = 12f;
     public float rotationRate = 15.0f;
     public float playerGravity = -9.8f;
+    public float crystalCount = 0f;
 
     CharacterController characterController;
     Animator animator;
@@ -46,7 +49,7 @@ public class JammoPlayerController : MonoBehaviour
         jumpAction = InputSystem.actions.FindAction("Player/Jump");
         sprintAction = InputSystem.actions.FindAction("Player/Sprint");
 
-        fallAfterJumpThreshold = jumpHeight/2.2f; // Increasing the denominator will make the player fall sooner.
+        fallAfterJumpThreshold = jumpHeight/2f; // Increasing the denominator will make the player fall sooner.
 
         Vector3 initialMove = new Vector3(0f, playerGravity, 0f);
         characterController.Move(initialMove * Time.deltaTime);
@@ -95,20 +98,26 @@ public class JammoPlayerController : MonoBehaviour
             animator.SetBool("isRunning", false);
         }
 
-        if (moveValue.y < fallAfterJumpThreshold && !characterController.isGrounded)
+        if (moveValue.y > fallAfterJumpThreshold) // Jumping on the way up
+        {
+            animator.SetBool("isFalling", false);
+            animator.SetBool("isGrounded", false);
+        }
+        else if (moveValue.y < fallAfterJumpThreshold && !characterController.isGrounded) // Falling after jump on the way down
         {
             animator.SetBool("isFalling", true);
             animator.SetBool("isGrounded", false);
         }
-        else if(moveValue.y > fallAfterJumpThreshold || characterController.isGrounded)
+        else if (characterController.isGrounded) // After jump, hitting the ground
         {
             animator.SetBool("isFalling", false);
             animator.SetBool("isGrounded", true);
         }
 
-        if (jumpAction.IsPressed() && characterController.isGrounded && CheckJumpState())
+        if (jumpAction.IsPressed() && characterController.isGrounded && CheckStateForJump())
         {
             animator.SetBool("isJumping", true);
+            animator.SetBool("isGrounded", false);
         }
         else
         {
@@ -140,9 +149,9 @@ public class JammoPlayerController : MonoBehaviour
             float groundedGravity = -0.05f;
             moveValue.y = groundedGravity;
 
-            if (jumpAction.IsPressed() && CheckJumpState())
+            if (jumpAction.IsPressed() && CheckStateForJump())
             {
-                moveValue.y = jumpHeight;
+                moveValue.y = jumpHeight - (jumpHeight * speedModifier);
             }
         }
         else
@@ -151,7 +160,8 @@ public class JammoPlayerController : MonoBehaviour
         }
     }
 
-    bool CheckJumpState()
+    // Helper function that checks if the animator is in the Run, Walk, or Idle states before allowing the player to jump.
+    bool CheckStateForJump()
     {
         return animatorStateInfo.IsName("Base Layer.Run") || animatorStateInfo.IsName("Base Layer.Walk") || animatorStateInfo.IsName("Base Layer.Idle");
     }
@@ -159,6 +169,7 @@ public class JammoPlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        speedModifier = crystalCount / 10;
         animatorStateInfo = animator.GetCurrentAnimatorStateInfo(0);
 
         // Handle player input and other calculations
@@ -166,9 +177,11 @@ public class JammoPlayerController : MonoBehaviour
         HandleRotation();
         HandleJumpAndGravity();
         HandleAnimation();
-        
+
+        float finalSpeed = speed - (speed * speedModifier);
+
         // Apply movement
-        Vector3 finalMove = new Vector3(moveValue.x * speed, moveValue.y, moveValue.z * speed);
+        Vector3 finalMove = new Vector3(moveValue.x * finalSpeed, moveValue.y, moveValue.z * finalSpeed);
         characterController.Move(finalMove * Time.deltaTime);
 
         
