@@ -1,14 +1,21 @@
 using System.Xml.Serialization;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class ExtractionPointController : MonoBehaviour
 {
     InputAction interactAction;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    Image fillCircle;
+
+    public float MaxImageFill = 1f;
+    public float holdDuration = 5f;
+    private float holdTimer = 0f;
+   
     void Start()
     {
         interactAction = InputSystem.actions.FindAction("Player/Interact");
+        fillCircle = GameObject.FindGameObjectWithTag("LoadCircle").GetComponent<Image>();
     }
 
     private void OnTriggerStay(Collider other)
@@ -17,14 +24,50 @@ public class ExtractionPointController : MonoBehaviour
         {
             if (interactAction.IsPressed())
             {
-                Debug.Log("test");
+                if (holdTimer < MaxImageFill) // Makes sure holdTimer stays within the bounds of the duration and doesn't over-increment
+                {
+                    IncrementTimer();
+                }
+                else if (holdTimer >= MaxImageFill)
+                {
+                    ClearFillCircle();
+                    other.gameObject.GetComponent<JammoPlayerController>().crystalCount = 0;
+                }
+            }
+            else if (!interactAction.IsPressed())
+            {
+                if (holdTimer >= 0) // Same as above, but for  over-decrementing
+                {
+                    DecrementTimer();
+                }
             }
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnTriggerExit(Collider other)
     {
-        
+        if (other.gameObject.CompareTag("Player"))
+        {
+            ClearFillCircle();
+        }
+
+    }
+
+    void DecrementTimer()
+    {
+        holdTimer -= Time.deltaTime / holdDuration;
+        fillCircle.fillAmount = holdTimer / MaxImageFill;
+    }
+
+    void IncrementTimer()
+    {
+        holdTimer += Time.deltaTime / holdDuration;
+        fillCircle.fillAmount = holdTimer / MaxImageFill;
+    }
+
+    void ClearFillCircle()
+    {
+        holdTimer = 0;
+        fillCircle.fillAmount = 0f;
     }
 }

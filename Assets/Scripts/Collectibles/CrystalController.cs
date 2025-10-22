@@ -8,10 +8,9 @@ public class CrystalController : MonoBehaviour
     InputAction interactAction;
     Image fillCircle;
 
+    public static float MaxImageFill = 1f;
     public float holdDuration = 1f;
-
     private float holdTimer = 0f;
-    private bool isHolding = false;
 
     private void Start()
     {
@@ -32,8 +31,7 @@ public class CrystalController : MonoBehaviour
             {
                 if (holdTimer < holdDuration) // Makes sure holdTimer stays within the bounds of the duration and doesn't over-increment
                 {
-                    holdTimer += Time.deltaTime;
-                    fillCircle.fillAmount = holdTimer / holdDuration;
+                    IncrementTimer();
                 }
                 else if (holdTimer >= holdDuration) // If the holdTime is completed, add a crystal to the player
                 {
@@ -46,8 +44,7 @@ public class CrystalController : MonoBehaviour
             {
                 if(holdTimer >= 0) // Same as above, but for  over-decrementing
                 {
-                    holdTimer -= Time.deltaTime;
-                    fillCircle.fillAmount = holdTimer / holdDuration;
+                    DecrementTimer();
                 }
             }
         }
@@ -60,6 +57,18 @@ public class CrystalController : MonoBehaviour
             ClearFillCircle();
         }
         
+    }
+
+    void DecrementTimer()
+    {
+        holdTimer -= Time.deltaTime / holdDuration;
+        fillCircle.fillAmount = holdTimer / MaxImageFill;
+    }
+
+    void IncrementTimer()
+    {
+        holdTimer += Time.deltaTime / holdDuration;
+        fillCircle.fillAmount = holdTimer / MaxImageFill;
     }
 
     void ClearFillCircle()
