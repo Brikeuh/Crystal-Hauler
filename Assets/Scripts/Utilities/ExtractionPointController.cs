@@ -27,11 +27,13 @@ public class ExtractionPointController : MonoBehaviour
                 if (holdTimer < MaxImageFill) // Makes sure holdTimer stays within the bounds of the duration and doesn't over-increment
                 {
                     IncrementTimer();
+                    other.gameObject.GetComponent<Animator>().SetBool("isExtracting", true);
                 }
                 else if (holdTimer >= MaxImageFill)
                 {
                     ClearFillCircle();
                     other.gameObject.GetComponent<JammoPlayerController>().crystalCount = 0;
+                    other.gameObject.GetComponent<Animator>().SetBool("isExtracting", false);
                 }
             }
             else if (!interactAction.IsPressed())
@@ -39,6 +41,7 @@ public class ExtractionPointController : MonoBehaviour
                 if (holdTimer >= 0) // Same as above, but for  over-decrementing
                 {
                     DecrementTimer();
+                    other.gameObject.GetComponent<Animator>().SetBool("isExtracting", false);
                 }
             }
         }

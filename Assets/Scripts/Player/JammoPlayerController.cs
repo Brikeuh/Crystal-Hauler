@@ -30,6 +30,9 @@ public class JammoPlayerController : MonoBehaviour
     public float playerGravity = -9.8f;
     public float crystalCount = 0f;
 
+    [Header("External Object References")]
+    public Transform cameraTransform;
+
     CharacterController characterController;
     Animator animator;
     AnimatorStateInfo animatorStateInfo;
@@ -70,6 +73,8 @@ public class JammoPlayerController : MonoBehaviour
         {
             speed = walkSpeed;
         }
+
+        moveValue = Quaternion.AngleAxis(cameraTransform.rotation.eulerAngles.y, Vector3.up) * moveValue;
     }
 
     void HandleAnimation()
@@ -170,6 +175,7 @@ public class JammoPlayerController : MonoBehaviour
     void Update()
     {
         speedModifier = crystalCount / 10;
+        animator.SetFloat("moveSpeedModifier", 1-speedModifier);
         animatorStateInfo = animator.GetCurrentAnimatorStateInfo(0);
 
         // Handle player input and other calculations
@@ -183,7 +189,22 @@ public class JammoPlayerController : MonoBehaviour
         // Apply movement
         Vector3 finalMove = new Vector3(moveValue.x * finalSpeed, moveValue.y, moveValue.z * finalSpeed);
         characterController.Move(finalMove * Time.deltaTime);
+    }
 
+    private void OnAnimatorMove()
+    {
         
+    }
+
+    private void OnApplicationFocus(bool focus)
+    {
+        if (focus)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+        else
+        {
+            Cursor.lockState= CursorLockMode.None;
+        }
     }
 }
