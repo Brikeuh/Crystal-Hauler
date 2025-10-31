@@ -1,4 +1,4 @@
-# crystal-hauler by CodeCrank Studios
+# Crystal-Hauler by CodeCrank Studios
 GATech OMSCS: CS-6457-O01 - Fall '25
 
 Before you pull:
