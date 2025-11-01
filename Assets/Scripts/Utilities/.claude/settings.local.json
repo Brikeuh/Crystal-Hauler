@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d/UnityProjects/GT_CS4455_finalProject/Crystal-Hauler/Assets/Scripts/Collectibles/**)",
+      "Read(//d/UnityProjects/GT_CS4455_finalProject/Crystal-Hauler/Assets/Scripts/Player/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
