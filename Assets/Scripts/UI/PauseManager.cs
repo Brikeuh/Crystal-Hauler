@@ -16,7 +16,6 @@ public class PauseManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Debug.Log(isPaused);
         if (Input.GetKeyUp(KeyCode.P))
         {
             if (isPaused)
