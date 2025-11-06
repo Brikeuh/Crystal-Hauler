@@ -1,9 +1,12 @@
+using System;
 using System.IO;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class JammoPlayerController : MonoBehaviour
 {
+    private float Health = 100f;
+    private float MaxHealth = 100f;
     InputAction moveAction;
     InputAction jumpAction;
     InputAction sprintAction;
@@ -19,7 +22,7 @@ public class JammoPlayerController : MonoBehaviour
     private int isJumpingHash;
 
     private float speed;
-    private float speedModifier;
+    public float speedModifier;
     private float fallAfterJumpThreshold; // Determines when the player begins to fall after jumping.
 
     [Header("Player Attributes")]
@@ -28,20 +31,33 @@ public class JammoPlayerController : MonoBehaviour
     public float jumpHeight = 12f;
     public float rotationRate = 15.0f;
     public float playerGravity = -9.8f;
-    public float crystalCount = 0f;
-
-    [Header("External Object References")]
-    public Transform cameraTransform;
-
+    public int crystalCount = 0;
+    private float groundedBufferTime = 0.2f;
+    private float groundedTimer = 0f;
     CharacterController characterController;
-    Animator animator;
+    public Animator animator;
     AnimatorStateInfo animatorStateInfo;
+    public ParticleSystem CrystalPickupEffect;
+    public ParticleSystem CrystalPlacedEffect;
+    public AudioSource FootStepSound;
 
+
+    void UpdateGroundedStatus()
+    {
+        if (characterController.isGrounded)
+            groundedTimer = groundedBufferTime;
+        else
+            groundedTimer -= Time.deltaTime;
+
+        bool isActuallyGrounded = groundedTimer > 0f;
+        animator.SetBool("isGrounded", isActuallyGrounded);
+    }
     void Start()
     {
+
         characterController = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
-
+        UpdateGroundedStatus();
         isWalkingHash = Animator.StringToHash("isWalking");
         isRunningHash = Animator.StringToHash("isRunning");
         isFallingHash = Animator.StringToHash("isFalling");
@@ -52,7 +68,7 @@ public class JammoPlayerController : MonoBehaviour
         jumpAction = InputSystem.actions.FindAction("Player/Jump");
         sprintAction = InputSystem.actions.FindAction("Player/Sprint");
 
-        fallAfterJumpThreshold = jumpHeight/2f; // Increasing the denominator will make the player fall sooner.
+        fallAfterJumpThreshold = jumpHeight / 2f; // Increasing the denominator will make the player fall sooner.
 
         Vector3 initialMove = new Vector3(0f, playerGravity, 0f);
         characterController.Move(initialMove * Time.deltaTime);
@@ -65,6 +81,16 @@ public class JammoPlayerController : MonoBehaviour
         moveValue.x = moveValueInput.x;
         moveValue.z = moveValueInput.y;
 
+        if (characterController.isGrounded && moveValueInput != Vector2.zero)
+        {
+            if (!FootStepSound.isPlaying)
+                FootStepSound.Play();
+        }
+        else
+        {
+            if (FootStepSound.isPlaying)
+                FootStepSound.Stop();
+        }
         if (sprintAction.IsPressed())
         {
             speed = runSpeed;
@@ -73,63 +99,57 @@ public class JammoPlayerController : MonoBehaviour
         {
             speed = walkSpeed;
         }
-
-        moveValue = Quaternion.AngleAxis(cameraTransform.rotation.eulerAngles.y, Vector3.up) * moveValue;
     }
 
     void HandleAnimation()
     {
-        bool isWalking = animator.GetBool(isWalkingHash);
-        bool isRunning = animator.GetBool(isRunningHash);
-        bool isFalling = animator.GetBool(isFallingHash);
-        bool isGrounded = animator.GetBool(isGroundedHash);
-        bool isJumping = animator.GetBool(isJumpingHash);
+        // ---- READ CURRENT MOVEMENT INPUT ----
+        bool moving = moveAction.IsPressed();
+        bool sprinting = sprintAction.IsPressed();
 
-        if (moveAction.IsPressed() && !isWalking)
-        {
-            animator.SetBool("isWalking", true);
-        }
-        else if (!moveAction.IsPressed() && isWalking)
-        {
-            animator.SetBool("isWalking", false);
-        }
+        animator.SetBool("isWalking", moving && !sprinting && characterController.isGrounded);
+        animator.SetBool("isRunning", moving && sprinting && characterController.isGrounded);
 
-        if ((moveAction.IsPressed() && sprintAction.IsPressed()) && !isRunning)
-        {
-            animator.SetBool("isRunning", true);
-        }
-        else if ((!moveAction.IsPressed() || !sprintAction.IsPressed()) && isRunning)
-        {
-            animator.SetBool("isRunning", false);
-        }
+        // ---- GROUND CHECK BUFFER ----
+        if (characterController.isGrounded)
+            groundedTimer = groundedBufferTime;
+        else
+            groundedTimer -= Time.deltaTime;
 
-        if (moveValue.y > fallAfterJumpThreshold) // Jumping on the way up
+        bool isActuallyGrounded = groundedTimer > 0f;
+
+        // ---- JUMP ----
+        if (jumpAction.WasPressedThisFrame() && isActuallyGrounded && CheckStateForJump())
         {
+            animator.SetBool("isJumping", true);
             animator.SetBool("isFalling", false);
             animator.SetBool("isGrounded", false);
+            return;
         }
-        else if (moveValue.y < fallAfterJumpThreshold && !characterController.isGrounded) // Falling after jump on the way down
+
+        // ---- FALL ----
+        if (!isActuallyGrounded && moveValue.y < -0.1f)
         {
+            animator.SetBool("isJumping", false);
             animator.SetBool("isFalling", true);
             animator.SetBool("isGrounded", false);
         }
-        else if (characterController.isGrounded) // After jump, hitting the ground
+
+        // ---- LAND ----
+        if (isActuallyGrounded && !wasGroundedLastFrame)
         {
+            // Landed this frame
             animator.SetBool("isFalling", false);
+            animator.SetBool("isJumping", false);
             animator.SetBool("isGrounded", true);
+            // animator.SetTrigger("Land"); // optional
         }
 
-        if (jumpAction.IsPressed() && characterController.isGrounded && CheckStateForJump())
-        {
-            animator.SetBool("isJumping", true);
-            animator.SetBool("isGrounded", false);
-        }
-        else
-        {
-            animator.SetBool("isJumping", false);
-        }
+        wasGroundedLastFrame = isActuallyGrounded;
     }
 
+
+    private bool wasGroundedLastFrame = true;
     void HandleRotation()
     {
         Vector3 rotationPosition;
@@ -174,37 +194,68 @@ public class JammoPlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        speedModifier = crystalCount / 10;
-        animator.SetFloat("moveSpeedModifier", 1-speedModifier);
+        speedModifier = 1-((float)crystalCount / 10);
         animatorStateInfo = animator.GetCurrentAnimatorStateInfo(0);
-
+  UpdateAnimatorSpeed();
         // Handle player input and other calculations
         HandleMovement();
         HandleRotation();
         HandleJumpAndGravity();
         HandleAnimation();
 
-        float finalSpeed = speed - (speed * speedModifier);
+        float finalSpeed =speed * speedModifier;
 
         // Apply movement
         Vector3 finalMove = new Vector3(moveValue.x * finalSpeed, moveValue.y, moveValue.z * finalSpeed);
         characterController.Move(finalMove * Time.deltaTime);
-    }
 
-    private void OnAnimatorMove()
+
+    }
+    public void AddCrystals(int amount)
     {
+        ChangeCrystals(amount);
         
+        if (CrystalPickupEffect != null)
+        {
+            CrystalPickupEffect.Play();
+        }
+        SoundManager.Instance.PlaySound(SoundNames.CrystalPicked, SoundType.Effect);
+        UIManager.Instance.ShowToast("Crystal Picked Up. Now Deliver Them to Extraction Point");
+
     }
 
-    private void OnApplicationFocus(bool focus)
+    internal void DepositCrystals()
     {
-        if (focus)
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-        }
-        else
-        {
-            Cursor.lockState= CursorLockMode.None;
-        }
+        UIManager.Instance.ShowToast(crystalCount + " Crystals Deposited. Score Gained");
+        EventManager.OnScoresChanged?.Invoke((int)crystalCount);
+        ChangeCrystals(-crystalCount);
+       
+        CrystalPlacedEffect.Play();
+        SoundManager.Instance.PlaySound(SoundNames.CrystalPlaced, SoundType.Effect);
+
     }
+    public void ChangeCrystals(int amount)
+    {
+        crystalCount += amount;
+    EventManager.OnCrystalChanged?.Invoke(amount);
+    }
+    public void OnPlayerHit(float HitAmount)
+    {
+        if (crystalCount > 0)
+        {
+            ChangeCrystals(-1);
+            UIManager.Instance.ShowToast("Player Hit, Crystal Removed", 1f);
+            UIManager.Instance.HealthImage.fillAmount = Health / MaxHealth;
+        }
+
+    }
+    void UpdateAnimatorSpeed()
+{
+    // Ensures the animator slows down or speeds up based on speedModifier
+    // Example: if speedModifier = 0.5, animations play at half speed
+    if (animator != null)
+    {
+        animator.speed = Mathf.Clamp(speedModifier, 0.1f, 1f);
+    }
+}
 }
