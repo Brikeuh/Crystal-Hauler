@@ -12,14 +12,15 @@ public class EnemyMovement : MonoBehaviour
     public float s1 = 3.5f; // Enemy speed
 
     [Header("Detection Distances")]
-    public float d1 = 10f; // Chase distance
-    public float d2 = 2f; // Attack distance
+    public float chaseDistance = 10f; // Chase distance
+    public float attackDistance = 2f; // Attack distance
     public float crystalDetectionRange = 15f; // Range to detect crystals
 
     [Header("Attack Settings")]
     public float t1 = 1.5f; // Attack cooldown (interval between collisions)
     public float attackAcceleration = 10f; // Speed when lunging
     public float retreatDistance = 3f; // How far to retreat after attack
+    public float attackCooldown = 1f;
 
     [Header("Crystal Settings")]
     public float crystalConsumptionChance = 0.8f; // 80% chance to consume crystal
@@ -39,11 +40,11 @@ public class EnemyMovement : MonoBehaviour
     private NavMeshAgent navMeshAgent;
     private Renderer enemyRenderer;
     private float timer;
-    private float attackCooldownTimer;
+    private float attackTimer;
     private Vector3 wanderPoint;
     private Vector3 retreatPoint;
-    private bool isLunging = false;
-    private bool isRetreating = false;
+    //private bool isLunging = false;
+    //private bool isRetreating = false;
     private GameObject targetCrystal;
     private float consumptionTimer = 0f;
     private bool isConsuming = false;
@@ -57,8 +58,7 @@ public class EnemyMovement : MonoBehaviour
         enemyRenderer = GetComponent<Renderer>();
         navMeshAgent.speed = s1;
         timer = wanderTimer;
-        attackCooldownTimer = 0f;
-
+        attackTimer = attackCooldown;
         // Auto-find terrain if not assigned
         if (terrain == null)
         {
@@ -84,9 +84,9 @@ public class EnemyMovement : MonoBehaviour
         if (player == null) return;
 
         // Update attack cooldown
-        if (attackCooldownTimer > 0)
+        if (attackTimer > 0)
         {
-            attackCooldownTimer -= Time.deltaTime;
+            attackTimer -= Time.deltaTime;
         }
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
@@ -105,7 +105,7 @@ public class EnemyMovement : MonoBehaviour
         EnemyState previousState = currentState;
 
         // Priority: Attacking > Chasing > Wandering > Crystal (lowest)
-        if (distanceToPlayer <= d2)
+        if (distanceToPlayer <= attackDistance)
         {
             currentState = EnemyState.Attacking;
             // Cancel crystal consumption if player gets too close
@@ -115,7 +115,7 @@ public class EnemyMovement : MonoBehaviour
                 isConsuming = false;
             }
         }
-        else if (distanceToPlayer <= d1)
+        else if (distanceToPlayer <= chaseDistance)
         {
             currentState = EnemyState.Chasing;
             // Cancel crystal consumption if player is in chase range
@@ -167,6 +167,9 @@ public class EnemyMovement : MonoBehaviour
             case EnemyState.ConsumingCrystal:
                 ConsumeCrystal();
                 break;
+            default:
+                Wander();
+                break;
         }
     }
 
@@ -194,64 +197,66 @@ public class EnemyMovement : MonoBehaviour
         Vector3 direction = (player.position - transform.position).normalized;
         Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 10f);
+        
 
         // Handle lunging animation
-        if (isLunging)
-        {
-            // Accelerate towards player
-            navMeshAgent.speed = attackAcceleration;
-            navMeshAgent.SetDestination(player.position);
+        //if (isLunging)
+        //{
+        //    // Accelerate towards player
+        //    navMeshAgent.speed = attackAcceleration;
+        //    navMeshAgent.SetDestination(player.position);
 
-            // Check if reached player
-            if (navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance + 0.1f)
-            {
-                PerformAttack();
-                isLunging = false;
-                isRetreating = true;
+        //    // Check if reached player
+        //    if (navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance + 0.1f)
+        //    {
+        //        PerformAttack();
+        //        isLunging = false;
+        //        isRetreating = true;
 
-                // Calculate retreat point
-                Vector3 retreatDirection = (transform.position - player.position).normalized;
-                retreatPoint = transform.position + retreatDirection * retreatDistance;
+        //        // Calculate retreat point
+        //        Vector3 retreatDirection = (transform.position - player.position).normalized;
+        //        retreatPoint = transform.position + retreatDirection * retreatDistance;
 
-                NavMeshHit hit;
-                if (NavMesh.SamplePosition(retreatPoint, out hit, retreatDistance, NavMesh.AllAreas))
-                {
-                    retreatPoint = hit.position;
-                }
-            }
-        }
-        else if (isRetreating)
-        {
-            // Retreat back
-            navMeshAgent.speed = s1;
-            navMeshAgent.SetDestination(retreatPoint);
+        //        NavMeshHit hit;
+        //        if (NavMesh.SamplePosition(retreatPoint, out hit, retreatDistance, NavMesh.AllAreas))
+        //        {
+        //            retreatPoint = hit.position;
+        //        }
+        //    }
+        //}
+        //else if (isRetreating)
+        //{
+        //    // Retreat back
+        //    navMeshAgent.speed = s1;
+        //    navMeshAgent.SetDestination(retreatPoint);
 
-            // Check if reached retreat point
-            if (navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance + 0.1f)
-            {
-                isRetreating = false;
-                attackCooldownTimer = t1;
-            }
-        }
-        else
-        {
-            // Wait for cooldown
-            navMeshAgent.SetDestination(transform.position);
-            navMeshAgent.speed = s1;
+        //    // Check if reached retreat point
+        //    if (navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance + 0.1f)
+        //    {
+        //        isRetreating = false;
+        //        attackCooldownTimer = t1;
+        //    }
+        //}
+        //else
+        //{
+        // Wait for cooldown
+        navMeshAgent.SetDestination(transform.position);
+        navMeshAgent.speed = s1;
 
             // Start new attack if cooldown is ready
-            if (attackCooldownTimer <= 0)
-            {
-                isLunging = true;
-            }
+        if (attackTimer <= 0)
+        {
+            //isLunging = true;
+            PerformAttack();
         }
+        //}
     }
 
     void PerformAttack()
     {
         // Perform attack logic here (e.g., deal damage, play animation)
         Debug.Log("Enemy collides with player!");
-
+        attackTimer = attackCooldown; // Reset the attack timer
         // Example: You can add damage to player here
         // player.GetComponent<PlayerHealth>()?.TakeDamage(damageAmount);
     }
@@ -351,11 +356,11 @@ public class EnemyMovement : MonoBehaviour
     {
         // Chase distance (d1) - Yellow
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, d1);
+        Gizmos.DrawWireSphere(transform.position, chaseDistance);
 
         // Attack distance (d2) - Red
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, d2);
+        Gizmos.DrawWireSphere(transform.position, attackDistance);
 
         // Crystal detection range - Magenta
         Gizmos.color = Color.magenta;

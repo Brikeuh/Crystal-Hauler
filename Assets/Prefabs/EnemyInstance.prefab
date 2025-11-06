@@ -147,13 +147,18 @@ MonoBehaviour:
   player: {fileID: 0}
   terrain: {fileID: 0}
   s1: 3.5
-  d1: 10
-  d2: 2
+  chaseDistance: 10
+  attackDistance: 2
+  crystalDetectionRange: 7.5
   t1: 2
-  attackAcceleration: 10
-  retreatDistance: 2
+  attackAcceleration: 5
+  retreatDistance: 100
+  crystalConsumptionChance: 0.8
+  crystalConsumptionRange: 2
+  consumptionTime: 1
   wanderRadius: 20
   wanderTimer: 5
   wanderingColor: {r: 0, g: 1, b: 0, a: 1}
   chasingColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   attackingColor: {r: 1, g: 0, b: 0, a: 1}
+  consumingColor: {r: 1, g: 0, b: 1, a: 1}
