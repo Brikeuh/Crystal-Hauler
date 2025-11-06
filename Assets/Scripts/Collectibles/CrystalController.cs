@@ -96,7 +96,9 @@ public class CrystalController : MonoBehaviour
         if( UIManager.Instance!=null)
         UIManager.Instance.EInterection.SetActive(false);
         holdTimer = 0;
-         fillCircle.gameObject.SetActive(false);
+        if (fillCircle != null)
+            fillCircle.gameObject.SetActive(false);
+        if(fillCircle!=null)
         fillCircle.fillAmount = 0f;
     }
 

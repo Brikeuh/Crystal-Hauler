@@ -20,7 +20,7 @@ public class JammoPlayerController : MonoBehaviour
     private int isFallingHash;
     private int isGroundedHash;
     private int isJumpingHash;
-
+float verticalVelocity = 0f; // Add this field near top of the class
     private float speed;
     public float speedModifier;
     private float fallAfterJumpThreshold; // Determines when the player begins to fall after jumping.
@@ -41,7 +41,8 @@ public class JammoPlayerController : MonoBehaviour
     public ParticleSystem CrystalPlacedEffect;
     public AudioSource FootStepSound;
 
-
+    [Header("Camera Reference")]
+    public Transform cameraTransform; // Used for camera-relative movement
     void UpdateGroundedStatus()
     {
         if (characterController.isGrounded)
@@ -74,12 +75,35 @@ public class JammoPlayerController : MonoBehaviour
         characterController.Move(initialMove * Time.deltaTime);
     }
 
-    void HandleMovement()
+ void HandleMovement()
     {
         moveValueInput = moveAction.ReadValue<Vector2>();
 
-        moveValue.x = moveValueInput.x;
-        moveValue.z = moveValueInput.y;
+        // Camera-relative movement
+        if (cameraTransform != null)
+        {
+            Vector3 camForward = cameraTransform.forward;
+            Vector3 camRight = cameraTransform.right;
+
+            // Flatten camera vectors to ignore pitch
+            camForward.y = 0f;
+            camRight.y = 0f;
+
+            camForward.Normalize();
+            camRight.Normalize();
+
+            Vector3 moveDirection = camForward * moveValueInput.y + camRight * moveValueInput.x;
+            moveDirection.Normalize();
+
+            moveValue.x = moveDirection.x;
+            moveValue.z = moveDirection.z;
+        }
+        else
+        {
+            // Fallback if camera is missing
+            moveValue.x = moveValueInput.x;
+            moveValue.z = moveValueInput.y;
+        }
 
         if (characterController.isGrounded && moveValueInput != Vector2.zero)
         {
@@ -91,16 +115,11 @@ public class JammoPlayerController : MonoBehaviour
             if (FootStepSound.isPlaying)
                 FootStepSound.Stop();
         }
-        if (sprintAction.IsPressed())
-        {
-            speed = runSpeed;
-        }
-        else
-        {
-            speed = walkSpeed;
-        }
+
+        speed = sprintAction.IsPressed() ? runSpeed : walkSpeed;
     }
 
+ 
     void HandleAnimation()
     {
         // ---- READ CURRENT MOVEMENT INPUT ----
@@ -150,40 +169,42 @@ public class JammoPlayerController : MonoBehaviour
 
 
     private bool wasGroundedLastFrame = true;
-    void HandleRotation()
+     void HandleRotation()
     {
-        Vector3 rotationPosition;
-
-        rotationPosition.x = moveValue.x;
-        rotationPosition.y = 0.0f;
-        rotationPosition.z = moveValue.z;
-
-        Quaternion currentRotation = transform.rotation;
-
         if (moveAction.IsPressed())
         {
-            Quaternion targetRotation = Quaternion.LookRotation(rotationPosition);
-            transform.rotation = Quaternion.Slerp(currentRotation, targetRotation, rotationRate * Time.deltaTime);
-        }
-    }
-
-    void HandleJumpAndGravity()
-    {
-        if (characterController.isGrounded)
-        {
-            float groundedGravity = -0.05f;
-            moveValue.y = groundedGravity;
-
-            if (jumpAction.IsPressed() && CheckStateForJump())
+            Vector3 lookDirection = new Vector3(moveValue.x, 0f, moveValue.z);
+            if (lookDirection.sqrMagnitude > 0.001f)
             {
-                moveValue.y = jumpHeight - (jumpHeight * speedModifier);
+                Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationRate * Time.deltaTime);
             }
         }
-        else
+    }
+
+  void HandleJumpAndGravity()
+{
+    if (characterController.isGrounded)
+    {
+        // Reset vertical velocity slightly negative to stay grounded
+        if (verticalVelocity < 0f)
+            verticalVelocity = -2f;
+
+        // Jump logic
+        if (jumpAction.WasPressedThisFrame() && CheckStateForJump())
         {
-            moveValue.y += playerGravity * Time.deltaTime;
+            verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * playerGravity);
         }
     }
+    else
+    {
+        // Apply gravity over time
+        verticalVelocity += playerGravity * Time.deltaTime;
+    }
+
+    moveValue.y = verticalVelocity;
+}
+
 
     // Helper function that checks if the animator is in the Run, Walk, or Idle states before allowing the player to jump.
     bool CheckStateForJump()
@@ -206,9 +227,8 @@ public class JammoPlayerController : MonoBehaviour
         float finalSpeed =speed * speedModifier;
 
         // Apply movement
-        Vector3 finalMove = new Vector3(moveValue.x * finalSpeed, moveValue.y, moveValue.z * finalSpeed);
-        characterController.Move(finalMove * Time.deltaTime);
-
+       Vector3 finalMove = new Vector3(moveValue.x * speed * speedModifier, moveValue.y, moveValue.z * speed * speedModifier);
+characterController.Move(finalMove * Time.deltaTime);
 
     }
     public void AddCrystals(int amount)
