@@ -9,11 +9,12 @@ TagManager:
   - Enemy
   - Extractor
   - LoadCircle
+  - Hurtboxes
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - NavComponent
   - Water
   - UI
   - 
