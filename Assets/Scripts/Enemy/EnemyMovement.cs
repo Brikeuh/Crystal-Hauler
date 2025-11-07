@@ -9,11 +9,14 @@ public class EnemyMovement : MonoBehaviour
     public Terrain terrain;
 
     [Header("Movement Settings")]
-    public float s1 = 3.5f; // Enemy speed
+    public float speed = 2f; // Enemy speed
+    public float stopRadius; // Stopping distance from target
+    private float runSpeed; // Normal speed
+    private float runModifier = 1.5f;
+    public bool canMove = true;
 
     [Header("Detection Distances")]
     public float chaseDistance = 10f; // Chase distance
-    public float attackDistance = 2f; // Attack distance
     public float crystalDetectionRange = 15f; // Range to detect crystals
 
     [Header("Attack Settings")]
@@ -31,21 +34,22 @@ public class EnemyMovement : MonoBehaviour
     public float wanderRadius = 20f; // How far to wander
     public float wanderTimer = 5f; // Time before choosing new wander point
 
-    [Header("State Colors")]
-    public Color wanderingColor = Color.green;
-    public Color chasingColor = Color.yellow;
-    public Color attackingColor = Color.red;
-    public Color consumingColor = Color.magenta;
+    // Colors for different states
+    private Color wanderingColor = Color.green;
+    private Color chasingColor = Color.yellow;
+    private Color attackingColor = Color.red;
+    private Color consumingColor = Color.magenta;
 
     private NavMeshAgent navMeshAgent;
-    private Renderer enemyRenderer;
+    private Animator animator;
+    private GameObject targetCrystal;
+    private GameObject hurtBox;
+    private Renderer stateIndicator;
+
     private float timer;
     private float attackTimer;
     private Vector3 wanderPoint;
-    private Vector3 retreatPoint;
-    //private bool isLunging = false;
-    //private bool isRetreating = false;
-    private GameObject targetCrystal;
+    
     private float consumptionTimer = 0f;
     private bool isConsuming = false;
 
@@ -55,25 +59,29 @@ public class EnemyMovement : MonoBehaviour
     void Start()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
-        enemyRenderer = GetComponent<Renderer>();
-        navMeshAgent.speed = s1;
+        animator = GetComponent<Animator>();
+        hurtBox = this.transform.GetChild(0).gameObject;
+        stateIndicator = this.transform.GetChild(1).GetComponent<Renderer>();
+
+        runSpeed = speed * runModifier;
+        navMeshAgent.speed = speed;
         timer = wanderTimer;
         attackTimer = attackCooldown;
         // Auto-find terrain if not assigned
-        if (terrain == null)
-        {
-            terrain = Terrain.activeTerrain;
-        }
+        //if (terrain == null)
+        //{
+        //    terrain = Terrain.activeTerrain;
+        //}
 
-        // Auto-find player if not assigned
-        if (player == null)
-        {
-            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-            if (playerObj != null)
-            {
-                player = playerObj.transform;
-            }
-        }
+        //// Auto-find player if not assigned
+        //if (player == null)
+        //{
+        //    GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        //    if (playerObj != null)
+        //    {
+        //        player = playerObj.transform;
+        //    }
+        //}
 
         SetNewWanderPoint();
         UpdateColor();
@@ -105,7 +113,7 @@ public class EnemyMovement : MonoBehaviour
         EnemyState previousState = currentState;
 
         // Priority: Attacking > Chasing > Wandering > Crystal (lowest)
-        if (distanceToPlayer <= attackDistance)
+        if (distanceToPlayer <= stopRadius)
         {
             currentState = EnemyState.Attacking;
             // Cancel crystal consumption if player gets too close
@@ -115,7 +123,7 @@ public class EnemyMovement : MonoBehaviour
                 isConsuming = false;
             }
         }
-        else if (distanceToPlayer <= chaseDistance)
+        else if (distanceToPlayer <= chaseDistance && canMove)
         {
             currentState = EnemyState.Chasing;
             // Cancel crystal consumption if player is in chase range
@@ -125,7 +133,7 @@ public class EnemyMovement : MonoBehaviour
                 isConsuming = false;
             }
         }
-        else if (targetCrystal != null)
+        else if (targetCrystal != null && canMove)
         {
             // Go for crystal only if player is far away
             float distanceToCrystal = Vector3.Distance(transform.position, targetCrystal.transform.position);
@@ -141,7 +149,7 @@ public class EnemyMovement : MonoBehaviour
                 currentState = EnemyState.ConsumingCrystal;
             }
         }
-        else
+        else if (canMove)
         {
             currentState = EnemyState.Wandering;
         }
@@ -177,17 +185,21 @@ public class EnemyMovement : MonoBehaviour
     {
         timer += Time.deltaTime;
 
+        SetWalk();
+
         if (timer >= wanderTimer || navMeshAgent.remainingDistance < 0.5f)
         {
             SetNewWanderPoint();
             timer = 0;
         }
-
+        navMeshAgent.stoppingDistance = 0f;
         navMeshAgent.SetDestination(wanderPoint);
     }
 
     void Chase()
     {
+        SetRun();
+        navMeshAgent.stoppingDistance = stopRadius;
         navMeshAgent.SetDestination(player.position);
     }
 
@@ -197,68 +209,22 @@ public class EnemyMovement : MonoBehaviour
         Vector3 direction = (player.position - transform.position).normalized;
         Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 10f);
+
+        canMove = false;
         
-
-        // Handle lunging animation
-        //if (isLunging)
-        //{
-        //    // Accelerate towards player
-        //    navMeshAgent.speed = attackAcceleration;
-        //    navMeshAgent.SetDestination(player.position);
-
-        //    // Check if reached player
-        //    if (navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance + 0.1f)
-        //    {
-        //        PerformAttack();
-        //        isLunging = false;
-        //        isRetreating = true;
-
-        //        // Calculate retreat point
-        //        Vector3 retreatDirection = (transform.position - player.position).normalized;
-        //        retreatPoint = transform.position + retreatDirection * retreatDistance;
-
-        //        NavMeshHit hit;
-        //        if (NavMesh.SamplePosition(retreatPoint, out hit, retreatDistance, NavMesh.AllAreas))
-        //        {
-        //            retreatPoint = hit.position;
-        //        }
-        //    }
-        //}
-        //else if (isRetreating)
-        //{
-        //    // Retreat back
-        //    navMeshAgent.speed = s1;
-        //    navMeshAgent.SetDestination(retreatPoint);
-
-        //    // Check if reached retreat point
-        //    if (navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance + 0.1f)
-        //    {
-        //        isRetreating = false;
-        //        attackCooldownTimer = t1;
-        //    }
-        //}
-        //else
-        //{
-        // Wait for cooldown
-        navMeshAgent.SetDestination(transform.position);
-        navMeshAgent.speed = s1;
-
-            // Start new attack if cooldown is ready
+        // Start new attack if cooldown is ready
         if (attackTimer <= 0)
         {
-            //isLunging = true;
             PerformAttack();
+            canMove = true;
         }
-        //}
     }
 
     void PerformAttack()
     {
-        // Perform attack logic here (e.g., deal damage, play animation)
-        Debug.Log("Enemy collides with player!");
+        animator.SetBool("isWalking", false);
+        animator.SetBool("isAttacking", true);
         attackTimer = attackCooldown; // Reset the attack timer
-        // Example: You can add damage to player here
-        // player.GetComponent<PlayerHealth>()?.TakeDamage(damageAmount);
     }
 
     void SetNewWanderPoint()
@@ -299,7 +265,6 @@ public class EnemyMovement : MonoBehaviour
                 nearestCrystal = crystal;
             }
         }
-
         return nearestCrystal;
     }
 
@@ -316,7 +281,7 @@ public class EnemyMovement : MonoBehaviour
         float distanceToCrystal = Vector3.Distance(transform.position, targetCrystal.transform.position);
 
         // Move towards crystal
-        navMeshAgent.speed = s1;
+        SetWalk();
         navMeshAgent.SetDestination(targetCrystal.transform.position);
 
         // Consume immediately when in range
@@ -330,23 +295,44 @@ public class EnemyMovement : MonoBehaviour
         }
     }
 
+    void SetWalk()
+    {
+        animator.SetBool("isWalking", true);
+        animator.SetBool("isAttacking", false);
+        animator.SetFloat("moveSpeedModifier", 1f);
+        navMeshAgent.speed = speed;
+    }
+
+    void SetRun()
+    {
+        animator.SetBool("isWalking", true);
+        animator.SetBool("isAttacking", false);
+        animator.SetFloat("moveSpeedModifier", runModifier);
+        navMeshAgent.speed = runSpeed;
+    }
+
+    void ToggleAttack()
+    {
+        hurtBox.SetActive(!hurtBox.activeSelf);
+    }
+
     void UpdateColor()
     {
-        if (enemyRenderer == null) return;
+        if (stateIndicator == null) return;
 
         switch (currentState)
         {
             case EnemyState.Wandering:
-                enemyRenderer.material.color = wanderingColor;
+                stateIndicator.material.color = wanderingColor;
                 break;
             case EnemyState.Chasing:
-                enemyRenderer.material.color = chasingColor;
+                stateIndicator.material.color = chasingColor;
                 break;
             case EnemyState.Attacking:
-                enemyRenderer.material.color = attackingColor;
+                stateIndicator.material.color = attackingColor;
                 break;
             case EnemyState.ConsumingCrystal:
-                enemyRenderer.material.color = consumingColor;
+                stateIndicator.material.color = consumingColor;
                 break;
         }
     }
@@ -360,7 +346,7 @@ public class EnemyMovement : MonoBehaviour
 
         // Attack distance (d2) - Red
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackDistance);
+        Gizmos.DrawWireSphere(transform.position, stopRadius);
 
         // Crystal detection range - Magenta
         Gizmos.color = Color.magenta;
