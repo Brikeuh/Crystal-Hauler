@@ -7,6 +7,7 @@ public class GameManager : MonoBehaviour
 
     [Header("UI Object References")]
     public GameObject introUI;
+    public GameObject winUI;
 
     private bool isGameWon; 
     private bool isGameLost;
@@ -58,7 +59,7 @@ public class GameManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Time.timeScale = 1f;
 
-        if (isGameWon)
+        if (player.GetComponent<PlayerController>().score >= 10)
         {
             currentState = GameState.Won;
         }
@@ -70,14 +71,18 @@ public class GameManager : MonoBehaviour
 
     void GameIsWon()
     {
-        Debug.Log("You Win!");
+        Transform childTransform = winUI.transform.GetChild(0); 
+        childTransform.gameObject.SetActive(true);
+
         Cursor.lockState = CursorLockMode.None;
         Time.timeScale = 0;
     }
 
     void GameIsLost()
     {
-        Debug.Log("You Lose!");
+        Transform childTransform = winUI.transform.GetChild(1);
+        childTransform.gameObject.SetActive(true);
+
         Cursor.lockState = CursorLockMode.None;
         Time.timeScale = 0;
     }

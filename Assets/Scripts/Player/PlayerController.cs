@@ -23,13 +23,14 @@ public class PlayerController : MonoBehaviour
     private float fallAfterJumpThreshold; // Determines when the player begins to fall after jumping.
 
     [Header("Player Attributes")]
-    public int maxHealth = 100;
+    public int health = 100;
     public float walkSpeed = 2f;
     public float runSpeed = 4f;
     public float jumpHeight = 12f;
     public float rotationRate = 15.0f;
     public float playerGravity = -9.8f;
-    public float crystalCount = 0f;
+    public float crystalCount = 0;
+    public float score = 0;
 
     [Header("External Object References")]
     public Transform cameraTransform;
@@ -60,25 +61,7 @@ public class PlayerController : MonoBehaviour
         characterController.Move(initialMove * Time.deltaTime);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        speedModifier = crystalCount / 10;
-        animator.SetFloat("moveSpeedModifier", 1 - speedModifier);
-        animatorStateInfo = animator.GetCurrentAnimatorStateInfo(0);
-
-        // Handle player input and other calculations
-        HandleMovement();
-        HandleRotation();
-        HandleJumpAndGravity();
-        HandleAnimation();
-
-        float finalSpeed = speed - (speed * speedModifier);
-
-        // Apply movement
-        Vector3 finalMove = new Vector3(moveValue.x * finalSpeed, moveValue.y, moveValue.z * finalSpeed);
-        characterController.Move(finalMove * Time.deltaTime);
-    }
+    
 
     // Helper functions for handling different aspects of player control
     void HandleMovement()
@@ -194,13 +177,26 @@ public class PlayerController : MonoBehaviour
     // Public functions
     public void TakeDamage(int damageAmount)
     {
-        maxHealth -= damageAmount;
-        if (maxHealth <= 0)
+        health -= damageAmount;
+        if (health <= 0)
         {
             Die();
         }
-        Debug.Log($"{gameObject.name} took {damageAmount} damage. Current health: {maxHealth}");
+        Debug.Log($"{gameObject.name} took {damageAmount} damage. Current health: {health}");
     }
+
+    public void AddCrystal()
+    {
+        crystalCount++;
+        Debug.Log($"{gameObject.name} collected a crystal. Total crystals: {crystalCount}");
+    }
+
+    public void DepositCrystals()
+    {
+        score = score + crystalCount;
+        crystalCount = 0;
+    }
+
     private void Die()
     {
         Debug.Log($"{gameObject.name} has died.");
@@ -209,7 +205,26 @@ public class PlayerController : MonoBehaviour
         gameManager.LoseGame();
     }
 
-   
+    // Update is called once per frame
+    void Update()
+    {
+        speedModifier = crystalCount / 10;
+        Debug.Log("Crystal Count: " + crystalCount + " Speed Modifier: " + speedModifier);
+        animator.SetFloat("moveSpeedModifier", 1f - speedModifier);
+        animatorStateInfo = animator.GetCurrentAnimatorStateInfo(0);
+
+        // Handle player input and other calculations
+        HandleMovement();
+        HandleRotation();
+        HandleJumpAndGravity();
+        HandleAnimation();
+
+        float finalSpeed = speed - (speed * speedModifier);
+
+        // Apply movement
+        Vector3 finalMove = new Vector3(moveValue.x * finalSpeed, moveValue.y, moveValue.z * finalSpeed);
+        characterController.Move(finalMove * Time.deltaTime);
+    }
 
     //private void OnApplicationFocus(bool focus)
     //{

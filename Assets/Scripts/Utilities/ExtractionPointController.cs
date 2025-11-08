@@ -32,7 +32,7 @@ public class ExtractionPointController : MonoBehaviour
                 else if (holdTimer >= MaxImageFill)
                 {
                     ClearFillCircle();
-                    other.gameObject.GetComponent<PlayerController>().crystalCount = 0;
+                    other.gameObject.GetComponent<PlayerController>().DepositCrystals();
                     other.gameObject.GetComponent<Animator>().SetBool("isExtracting", false);
                 }
             }

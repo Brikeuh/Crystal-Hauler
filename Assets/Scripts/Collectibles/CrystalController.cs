@@ -1,7 +1,7 @@
+using System.Xml.Serialization;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.InputSystem;
-using System.IO;
+using UnityEngine.UI;
 
 public class CrystalController : MonoBehaviour
 {
@@ -29,16 +29,16 @@ public class CrystalController : MonoBehaviour
         {
             if (interactAction.IsPressed())
             {
-                if (holdTimer < holdDuration) // Makes sure holdTimer stays within the bounds of the duration and doesn't over-increment
+                if (holdTimer < MaxImageFill) // Makes sure holdTimer stays within the bounds of the duration and doesn't over-increment
                 {
                     IncrementTimer();
                     other.gameObject.GetComponent<Animator>().SetBool("isPickingUp", true);
                 }
-                else if (holdTimer >= holdDuration) // If the holdTime is completed, add a crystal to the player
+                else if (fillCircle.fillAmount == 1) // If the holdTime is completed, add a crystal to the player
                 {
-                    ClearFillCircle();
                     this.gameObject.SetActive(false);
-                    other.gameObject.GetComponent<PlayerController>().crystalCount++;
+                    ClearFillCircle();
+                    other.gameObject.GetComponent<PlayerController>().AddCrystal();
                     other.gameObject.GetComponent<Animator>().SetBool("isPickingUp", false);
                 }
             }
@@ -76,7 +76,6 @@ public class CrystalController : MonoBehaviour
 
     void ClearFillCircle()
     {
-        holdTimer = 0;
         fillCircle.fillAmount = 0f;
     }
 
