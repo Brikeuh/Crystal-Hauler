@@ -20,7 +20,7 @@ public class CrystalController : MonoBehaviour
 
     void Rotate()
     {
-        transform.Rotate(new Vector3(0, 0, 50) * Time.deltaTime);
+transform.Rotate(Vector3.up * 50f * Time.deltaTime, Space.World);
     }
     void OnTriggerEnter(Collider other)
     {

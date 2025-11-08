@@ -5,7 +5,6 @@ public class MainMenuController : MonoBehaviour
 {
     public void StartGame()
     {
-        Cursor.lockState = CursorLockMode.Locked;
         SceneManager.LoadScene("MainScene");
         Time.timeScale = 1f;
         SoundManager.Instance.PlayButtonSound();

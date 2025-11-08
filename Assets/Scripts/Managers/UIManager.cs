@@ -173,6 +173,7 @@ ReferenceManager.Instance.GetPanel(PanelType.GamePlayPanel).Panel.SetActive(fals
         ReferenceManager.Instance.GetPanel(PanelType.IntroPanel).Panel.SetActive(false);
         EventManager.OnGameStateChange?.Invoke(GameState.Running);
         SoundManager.Instance.PlayButtonSound();
+         Cursor.lockState = CursorLockMode.Locked;
     }
     public void SwitchTheCam()
     {

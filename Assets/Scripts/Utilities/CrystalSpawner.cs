@@ -26,7 +26,7 @@ public class CrystalSpawner : MonoBehaviour
     private float spawnTimer = 0f;
     private Vector3 terrainSize;
     private Vector3 terrainPosition;
-    private bool hasSpawnedFirst = false;
+    private bool hasSpawnedFirst;
 
     // Minimum distance between crystals
     private float minDistanceBetweenCrystals = 8f;
@@ -52,6 +52,7 @@ public class CrystalSpawner : MonoBehaviour
 
     void Start()
     {
+        hasSpawnedFirst = false;
         // 1. locate terrain and find terrain parameters
         if (terrain == null)
         {
@@ -141,17 +142,17 @@ public class CrystalSpawner : MonoBehaviour
                 spawnPosition.y = terrainPosition.y + terrainHeight + spawnHeightOffset;
 
                 // Spawn the crystal
-                GameObject crystal = Instantiate(crystalPrefab, spawnPosition, Quaternion.identity);
+                GameObject crystal = Instantiate(crystalPrefab, spawnPosition, crystalPrefab.transform.rotation);
                 spawnedCrystals.Add(crystal);
                 foundValidPosition = true;
-                Debug.Log("CrystalSpawner: First crystal spawned at distance " + distance + " from player");
+                //Debug.Log("CrystalSpawner: First crystal spawned at distance " + distance + " from player");
                 break;
             }
         }
 
         if (!foundValidPosition)
         {
-            Debug.LogWarning("CrystalSpawner: Could not find valid position for first crystal");
+            //Debug.LogWarning("CrystalSpawner: Could not find valid position for first crystal");
         }
     }
 
@@ -178,7 +179,7 @@ public class CrystalSpawner : MonoBehaviour
                 spawnPosition.y = terrainPosition.y + terrainHeight + spawnHeightOffset;
 
                 // Spawn the crystal
-                GameObject crystal = Instantiate(crystalPrefab, spawnPosition, Quaternion.identity);
+                GameObject crystal = Instantiate(crystalPrefab, spawnPosition, crystalPrefab.transform.rotation);
                 spawnedCrystals.Add(crystal);
                 foundValidPosition = true;
                 break;

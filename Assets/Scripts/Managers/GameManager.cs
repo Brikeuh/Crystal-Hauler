@@ -94,11 +94,7 @@ public class GameManager : MonoBehaviour
     void Update()
     {
 
-if(CurrentLevelModel.GameState == GameState.Running && Input.GetKeyDown(KeyCode.Escape))
-        {
-            EventManager.OnGameStateChange?.Invoke(GameState.Paused);
-            
-        }
+
     }
    
    
