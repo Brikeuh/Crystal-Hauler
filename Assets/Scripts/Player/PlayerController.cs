@@ -2,7 +2,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class JammoPlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     InputAction moveAction;
     InputAction jumpAction;
@@ -23,6 +23,7 @@ public class JammoPlayerController : MonoBehaviour
     private float fallAfterJumpThreshold; // Determines when the player begins to fall after jumping.
 
     [Header("Player Attributes")]
+    public int maxHealth = 100;
     public float walkSpeed = 2f;
     public float runSpeed = 4f;
     public float jumpHeight = 12f;
@@ -32,6 +33,7 @@ public class JammoPlayerController : MonoBehaviour
 
     [Header("External Object References")]
     public Transform cameraTransform;
+    public GameManager gameManager;
 
     CharacterController characterController;
     Animator animator;
@@ -58,6 +60,27 @@ public class JammoPlayerController : MonoBehaviour
         characterController.Move(initialMove * Time.deltaTime);
     }
 
+    // Update is called once per frame
+    void Update()
+    {
+        speedModifier = crystalCount / 10;
+        animator.SetFloat("moveSpeedModifier", 1 - speedModifier);
+        animatorStateInfo = animator.GetCurrentAnimatorStateInfo(0);
+
+        // Handle player input and other calculations
+        HandleMovement();
+        HandleRotation();
+        HandleJumpAndGravity();
+        HandleAnimation();
+
+        float finalSpeed = speed - (speed * speedModifier);
+
+        // Apply movement
+        Vector3 finalMove = new Vector3(moveValue.x * finalSpeed, moveValue.y, moveValue.z * finalSpeed);
+        characterController.Move(finalMove * Time.deltaTime);
+    }
+
+    // Helper functions for handling different aspects of player control
     void HandleMovement()
     {
         moveValueInput = moveAction.ReadValue<Vector2>();
@@ -76,7 +99,6 @@ public class JammoPlayerController : MonoBehaviour
 
         moveValue = Quaternion.AngleAxis(cameraTransform.rotation.eulerAngles.y, Vector3.up) * moveValue;
     }
-
     void HandleAnimation()
     {
         bool isWalking = animator.GetBool(isWalkingHash);
@@ -129,7 +151,6 @@ public class JammoPlayerController : MonoBehaviour
             animator.SetBool("isJumping", false);
         }
     }
-
     void HandleRotation()
     {
         Vector3 rotationPosition;
@@ -146,7 +167,6 @@ public class JammoPlayerController : MonoBehaviour
             transform.rotation = Quaternion.Slerp(currentRotation, targetRotation, rotationRate * Time.deltaTime);
         }
     }
-
     void HandleJumpAndGravity()
     {
         if (characterController.isGrounded)
@@ -165,46 +185,41 @@ public class JammoPlayerController : MonoBehaviour
         }
     }
 
-    // Helper function that checks if the animator is in the Run, Walk, or Idle states before allowing the player to jump.
+    // Helper functions
     bool CheckStateForJump()
     {
         return animatorStateInfo.IsName("Base Layer.Run") || animatorStateInfo.IsName("Base Layer.Walk") || animatorStateInfo.IsName("Base Layer.Idle");
     }
 
-    // Update is called once per frame
-    void Update()
+    // Public functions
+    public void TakeDamage(int damageAmount)
     {
-        speedModifier = crystalCount / 10;
-        animator.SetFloat("moveSpeedModifier", 1-speedModifier);
-        animatorStateInfo = animator.GetCurrentAnimatorStateInfo(0);
-
-        // Handle player input and other calculations
-        HandleMovement();
-        HandleRotation();
-        HandleJumpAndGravity();
-        HandleAnimation();
-
-        float finalSpeed = speed - (speed * speedModifier);
-
-        // Apply movement
-        Vector3 finalMove = new Vector3(moveValue.x * finalSpeed, moveValue.y, moveValue.z * finalSpeed);
-        characterController.Move(finalMove * Time.deltaTime);
-    }
-
-    private void OnAnimatorMove()
-    {
-        
-    }
-
-    private void OnApplicationFocus(bool focus)
-    {
-        if (focus)
+        maxHealth -= damageAmount;
+        if (maxHealth <= 0)
         {
-            Cursor.lockState = CursorLockMode.Locked;
+            Die();
         }
-        else
-        {
-            Cursor.lockState= CursorLockMode.None;
-        }
+        Debug.Log($"{gameObject.name} took {damageAmount} damage. Current health: {maxHealth}");
     }
+    private void Die()
+    {
+        Debug.Log($"{gameObject.name} has died.");
+        // Implement death logic (e.g., disable GameObject, play death animation)
+        Destroy(gameObject);
+        gameManager.LoseGame();
+    }
+
+   
+
+    //private void OnApplicationFocus(bool focus)
+    //{
+    //    if (focus)
+    //    {
+    //        Cursor.lockState = CursorLockMode.Locked;
+    //    }
+    //    else
+    //    {
+    //        Cursor.lockState = CursorLockMode.None;
+    //    }
+    //}
 }

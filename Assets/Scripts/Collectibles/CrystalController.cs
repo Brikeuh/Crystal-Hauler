@@ -38,7 +38,7 @@ public class CrystalController : MonoBehaviour
                 {
                     ClearFillCircle();
                     this.gameObject.SetActive(false);
-                    other.gameObject.GetComponent<JammoPlayerController>().crystalCount++;
+                    other.gameObject.GetComponent<PlayerController>().crystalCount++;
                     other.gameObject.GetComponent<Animator>().SetBool("isPickingUp", false);
                 }
             }

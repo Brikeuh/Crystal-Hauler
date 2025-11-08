@@ -20,7 +20,7 @@ public class ExtractionPointController : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.gameObject.CompareTag("Player") && other.gameObject.GetComponent<JammoPlayerController>().crystalCount > 0)
+        if (other.gameObject.CompareTag("Player") && other.gameObject.GetComponent<PlayerController>().crystalCount > 0)
         {
             if (interactAction.IsPressed())
             {
@@ -32,7 +32,7 @@ public class ExtractionPointController : MonoBehaviour
                 else if (holdTimer >= MaxImageFill)
                 {
                     ClearFillCircle();
-                    other.gameObject.GetComponent<JammoPlayerController>().crystalCount = 0;
+                    other.gameObject.GetComponent<PlayerController>().crystalCount = 0;
                     other.gameObject.GetComponent<Animator>().SetBool("isExtracting", false);
                 }
             }
@@ -55,7 +55,6 @@ public class ExtractionPointController : MonoBehaviour
         }
 
     }
-
     void DecrementTimer()
     {
         holdTimer -= Time.deltaTime / holdDuration;
