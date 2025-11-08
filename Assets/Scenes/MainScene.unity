@@ -616,6 +616,79 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac0b09e7857660247b1477e93731de29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1001 &517453909
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1116371902028168016, guid: b8a6c7f98c224734898f148fd6384925, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: ebc9e4fa57abe514bbf676d6ddf7485d, type: 2}
+    - target: {fileID: 1223590635399538856, guid: b8a6c7f98c224734898f148fd6384925, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1182057267}
+    - target: {fileID: 1223590635399538856, guid: b8a6c7f98c224734898f148fd6384925, type: 3}
+      propertyPath: terrain
+      value: 
+      objectReference: {fileID: 293039740}
+    - target: {fileID: 1696834749189059949, guid: b8a6c7f98c224734898f148fd6384925, type: 3}
+      propertyPath: m_Name
+      value: SkeletonEnemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 1696834749189059949, guid: b8a6c7f98c224734898f148fd6384925, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2468889828458600031, guid: b8a6c7f98c224734898f148fd6384925, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 7.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 2468889828458600031, guid: b8a6c7f98c224734898f148fd6384925, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2468889828458600031, guid: b8a6c7f98c224734898f148fd6384925, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -3.89
+      objectReference: {fileID: 0}
+    - target: {fileID: 2468889828458600031, guid: b8a6c7f98c224734898f148fd6384925, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2468889828458600031, guid: b8a6c7f98c224734898f148fd6384925, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2468889828458600031, guid: b8a6c7f98c224734898f148fd6384925, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2468889828458600031, guid: b8a6c7f98c224734898f148fd6384925, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2468889828458600031, guid: b8a6c7f98c224734898f148fd6384925, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2468889828458600031, guid: b8a6c7f98c224734898f148fd6384925, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2468889828458600031, guid: b8a6c7f98c224734898f148fd6384925, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b8a6c7f98c224734898f148fd6384925, type: 3}
 --- !u!1001 &533328415
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6557,6 +6630,10 @@ PrefabInstance:
       value: Goblin
       objectReference: {fileID: 0}
     - target: {fileID: 5834306698685907952, guid: 2fe1f409eaf5a63409569a36fa3c6e6f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5834306698685907952, guid: 2fe1f409eaf5a63409569a36fa3c6e6f, type: 3}
       propertyPath: m_TagString
       value: Enemy
       objectReference: {fileID: 0}
@@ -9292,3 +9369,4 @@ SceneRoots:
   - {fileID: 1000162778}
   - {fileID: 293039741}
   - {fileID: 1855578570}
+  - {fileID: 517453909}

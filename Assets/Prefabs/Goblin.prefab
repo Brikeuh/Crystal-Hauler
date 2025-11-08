@@ -8240,11 +8240,8 @@ MonoBehaviour:
   canMove: 1
   chaseDistance: 7.5
   crystalDetectionRange: 5
-  t1: 2
   attackAcceleration: 5
-  retreatDistance: 3
   attackCooldown: 1
-  crystalConsumptionChance: 0.8
   crystalConsumptionRange: 2
   consumptionTime: 2
   wanderRadius: 20
@@ -8286,14 +8283,14 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 1.25
+  m_Radius: 0.49004394
   m_Height: 4
   m_Direction: 1
-  m_Center: {x: 0, y: 2, z: 0}
+  m_Center: {x: 0.052692555, y: 2, z: 0.043845586}
 --- !u!4 &6610245950934571338 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: e4c88fe2e81511d4dae9da620550ecf9, type: 3}

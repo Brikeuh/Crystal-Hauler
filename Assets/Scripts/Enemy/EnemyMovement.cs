@@ -10,23 +10,20 @@ public class EnemyMovement : MonoBehaviour
 
     [Header("Movement Settings")]
     public float speed = 2f; // Enemy speed
-    public float stopRadius; // Stopping distance from target
-    private float runSpeed; // Normal speed
+    public float stopRadius = 1.25f; // Stopping distance from target
+    private float runSpeed;
     private float runModifier = 1.5f;
     public bool canMove = true;
 
     [Header("Detection Distances")]
-    public float chaseDistance = 10f; // Chase distance
-    public float crystalDetectionRange = 15f; // Range to detect crystals
+    public float chaseDistance = 7.5f; // Chase distance
+    public float crystalDetectionRange = 5f; // Range to detect crystals
 
     [Header("Attack Settings")]
-    public float t1 = 1.5f; // Attack cooldown (interval between collisions)
-    public float attackAcceleration = 10f; // Speed when lunging
-    public float retreatDistance = 3f; // How far to retreat after attack
+    public float attackAcceleration = 5f; // Speed when lunging
     public float attackCooldown = 1f;
 
     [Header("Crystal Settings")]
-    public float crystalConsumptionChance = 0.8f; // 80% chance to consume crystal
     public float crystalConsumptionRange = 2f; // How close to be to consume crystal
     public float consumptionTime = 1f; // Time to consume crystal
 
@@ -67,21 +64,6 @@ public class EnemyMovement : MonoBehaviour
         navMeshAgent.speed = speed;
         timer = wanderTimer;
         attackTimer = attackCooldown;
-        // Auto-find terrain if not assigned
-        //if (terrain == null)
-        //{
-        //    terrain = Terrain.activeTerrain;
-        //}
-
-        //// Auto-find player if not assigned
-        //if (player == null)
-        //{
-        //    GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-        //    if (playerObj != null)
-        //    {
-        //        player = playerObj.transform;
-        //    }
-        //}
 
         SetNewWanderPoint();
         UpdateColor();
@@ -192,7 +174,8 @@ public class EnemyMovement : MonoBehaviour
             SetNewWanderPoint();
             timer = 0;
         }
-        navMeshAgent.stoppingDistance = 0f;
+        navMeshAgent.stoppingDistance = 1f;
+        AlignRotation(wanderPoint);
         navMeshAgent.SetDestination(wanderPoint);
     }
 
@@ -200,15 +183,15 @@ public class EnemyMovement : MonoBehaviour
     {
         SetRun();
         navMeshAgent.stoppingDistance = stopRadius;
+        AlignRotation(player.position);
         navMeshAgent.SetDestination(player.position);
     }
 
     void Attack()
     {
         // Look at player
-        Vector3 direction = (player.position - transform.position).normalized;
-        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
-        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 10f);
+        navMeshAgent.stoppingDistance = stopRadius;
+        AlignRotation(player.position);
 
         canMove = false;
         
@@ -216,6 +199,7 @@ public class EnemyMovement : MonoBehaviour
         if (attackTimer <= 0)
         {
             PerformAttack();
+            ClearHurtbox();
             canMove = true;
         }
     }
@@ -282,6 +266,7 @@ public class EnemyMovement : MonoBehaviour
 
         // Move towards crystal
         SetWalk();
+        AlignRotation(targetCrystal.transform.position);
         navMeshAgent.SetDestination(targetCrystal.transform.position);
 
         // Consume immediately when in range
@@ -314,6 +299,18 @@ public class EnemyMovement : MonoBehaviour
     void ToggleAttack()
     {
         hurtBox.SetActive(!hurtBox.activeSelf);
+    }
+
+    void ClearHurtbox()
+    {
+        hurtBox.SetActive(false);
+    }
+
+    void AlignRotation(Vector3 objectPosition)
+    {
+        Vector3 direction = (objectPosition - transform.position).normalized;
+        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
+        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 10f);
     }
 
     void UpdateColor()
