@@ -14,7 +14,6 @@ public class UIManager : MonoBehaviour
     [Header("HUD Elements")]
     public GameObject HUD;
     public TextMeshProUGUI scoreText;
-    public TextMeshProUGUI crystalCountText;
     public TextMeshProUGUI playerHealthText;
     public TextMeshProUGUI timerText;
     public GameObject loadCircle;
