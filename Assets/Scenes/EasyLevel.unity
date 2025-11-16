@@ -567,6 +567,10 @@ PrefabInstance:
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 9100000, guid: b74c5fe557f7baf4685605d6ef6aeb23, type: 2}
+    - target: {fileID: -6057140222963153312, guid: 82a2914d8f86c62488456950c8330e38, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: -6008434836159022525, guid: 82a2914d8f86c62488456950c8330e38, type: 3}
       propertyPath: m_Layer
       value: 6
@@ -917,6 +921,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -4216859302048453862, guid: 82a2914d8f86c62488456950c8330e38, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1919292402}
+    - targetCorrespondingSourceObject: {fileID: -4216859302048453862, guid: 82a2914d8f86c62488456950c8330e38, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 714345776}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: -927199367670048503, guid: 82a2914d8f86c62488456950c8330e38, type: 3}
       insertIndex: -1
@@ -929,7 +936,7 @@ PrefabInstance:
       addedObject: {fileID: 1182057265}
     - targetCorrespondingSourceObject: {fileID: -927199367670048503, guid: 82a2914d8f86c62488456950c8330e38, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1182057264}
+      addedObject: {fileID: 1182057270}
   m_SourcePrefab: {fileID: 100100000, guid: 82a2914d8f86c62488456950c8330e38, type: 3}
 --- !u!1 &424673466
 GameObject:
@@ -1437,6 +1444,37 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a579611ca6598134791824aa90c1309d, type: 3}
+--- !u!1 &714345775
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 714345776}
+  m_Layer: 6
+  m_Name: GroundCheck
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &714345776
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 714345775}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1182057267}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &814232523
 GameObject:
   m_ObjectHideFlags: 3
@@ -1696,26 +1734,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: -927199367670048503, guid: 82a2914d8f86c62488456950c8330e38, type: 3}
   m_PrefabInstance: {fileID: 359241262}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1182057264
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1182057261}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c58b455a9d6842f478de5e5d18525cd0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  walkSpeed: 3
-  runSpeed: 6
-  jumpHeight: 12
-  rotationRate: 15
-  playerGravity: -9.81
-  cameraTransform: {fileID: 1259478406}
-  crystalCount: {fileID: 11400000, guid: 2e17ce122a3a2224f965a6ea4d8e41ca, type: 2}
-  playerHealth: {fileID: 11400000, guid: 871fa7513534db84d9b2f6a2ca7a1372, type: 2}
 --- !u!143 &1182057265
 CharacterController:
   m_ObjectHideFlags: 0
@@ -1799,6 +1817,30 @@ CapsuleCollider:
   m_Height: 1.5566921
   m_Direction: 1
   m_Center: {x: -0.005707383, y: 0.87579536, z: 0.011894077}
+--- !u!114 &1182057270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1182057261}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98e362c79b2cba540be1ed0ae5f01043, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 5
+  jumpForce: 10
+  gravity: -20
+  rotationRate: 15
+  runModifier: 1.5
+  cameraTransform: {fileID: 1259478406}
+  groundCheck: {fileID: 714345776}
+  groundDistance: 0.2
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 8
+  crystalCount: {fileID: 11400000, guid: 2e17ce122a3a2224f965a6ea4d8e41ca, type: 2}
 --- !u!1 &1259478403
 GameObject:
   m_ObjectHideFlags: 0

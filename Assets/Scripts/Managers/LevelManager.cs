@@ -76,7 +76,6 @@ public class LevelManager : MonoBehaviour
     {
         while (timerSO.Value > 0)
         {
-            Debug.Log("Coroutine Active");
             timerSO.Value--; // Decrease the value by 1
             yield return new WaitForSeconds(1f); // Wait for 1 second
         }
