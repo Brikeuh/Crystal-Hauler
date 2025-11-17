@@ -9,15 +9,11 @@ public abstract class PlayerBaseState
         this.player = player;
     }
 
-    public virtual void EnterState() 
-    { 
-        Debug.Log($"Entered {this.GetType().Name}");
-    }
+    public virtual void EnterState() { }
 
     public abstract void UpdateState();
 
-    public virtual void ExitState() 
-    {
-        Debug.Log($"Exited {this.GetType().Name}");
-    }
+    public virtual void ChangeState() { }
+
+    public virtual void ExitState() { }
 }

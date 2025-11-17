@@ -3,14 +3,18 @@ using UnityEngine;
 
 public class LevelManager : MonoBehaviour
 {
+    [Header("Scriptable Objects")]
     [SerializeField] private FloatScriptableObject scoreSO;
     [SerializeField] private FloatScriptableObject crystalCountSO;
     [SerializeField] private FloatScriptableObject playerHealthSO;
     [SerializeField] private IntScriptableObject timerSO;
 
+    [Header("Level Attributes")]
+    [SerializeField] private int levelDuration = 60;
+
     private GameManager gameManager;
     private UIManager uiManager;
-    private int levelDuration = 60;
+    
     private void Awake()
     {
         if (GameManager.Instance == null)

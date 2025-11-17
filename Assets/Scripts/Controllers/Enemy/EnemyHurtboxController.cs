@@ -9,7 +9,7 @@ public class EnemyHurtboxController : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             Debug.Log("Player Hit by Enemy Attack");
-            other.GetComponent<PlayerController>().TakeDamage(damageAmount);
+            other.GetComponent<Player>().TakeDamage(damageAmount);
         }
     }
 }

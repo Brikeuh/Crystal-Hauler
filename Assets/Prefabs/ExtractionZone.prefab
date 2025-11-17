@@ -70,9 +70,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MaxImageFill: 1
   holdDuration: 5
-  crystalCount: {fileID: 11400000, guid: 2e17ce122a3a2224f965a6ea4d8e41ca, type: 2}
-  score: {fileID: 11400000, guid: beadc8a967e2d2e41bcd034c0391c035, type: 2}
-  fillCircleAmount: {fileID: 11400000, guid: b7860114248f2264ab932b22c2bc1656, type: 2}
+  crystalCountSO: {fileID: 11400000, guid: 2e17ce122a3a2224f965a6ea4d8e41ca, type: 2}
+  scoreSO: {fileID: 11400000, guid: beadc8a967e2d2e41bcd034c0391c035, type: 2}
+  fillCircleAmountSO: {fileID: 11400000, guid: b7860114248f2264ab932b22c2bc1656, type: 2}
 --- !u!1001 &2430168363680386061
 PrefabInstance:
   m_ObjectHideFlags: 0

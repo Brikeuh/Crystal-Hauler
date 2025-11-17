@@ -14,9 +14,9 @@ public class UIManager : MonoBehaviour
     [Header("HUD Elements")]
     public GameObject HUD;
     public TextMeshProUGUI scoreText;
-    public TextMeshProUGUI playerHealthText;
     public TextMeshProUGUI timerText;
     public GameObject loadCircle;
+    public GameObject playerHealthProgressBar;
 
     [Header("Game Results UI Panels")]
     public GameObject GameWinPanel;
@@ -27,6 +27,7 @@ public class UIManager : MonoBehaviour
 
     private GameObject[] childObjects;
     private Image loadCircleImage;
+    private Image playerHealthProgressBarImage;
     private GameManager gameManager;
     private bool isPaused = false;
     private int maxCrystals = 5;
@@ -61,7 +62,8 @@ public class UIManager : MonoBehaviour
 
     void Start()
     {
-        loadCircleImage = loadCircle.GetComponent<UnityEngine.UI.Image>();
+        loadCircleImage = loadCircle.GetComponent<Image>();
+        playerHealthProgressBarImage = playerHealthProgressBar.GetComponent<Image>();
         childObjects = new GameObject[maxCrystals];
 
         GameWinPanel.SetActive(false);
@@ -78,7 +80,7 @@ public class UIManager : MonoBehaviour
         scoreText.text = "score: " + scoreSO.Value.ToString();
         //crystalCountText.text = "Crystals: " + crystalCountSO.Value.ToString();
         DisplayCrystals();
-        playerHealthText.text = "Health: " + playerHealthSO.Value.ToString();
+        playerHealthProgressBarImage.fillAmount = playerHealthSO.Value / 100f;
         DisplayTimer();
         loadCircleImage.fillAmount = fillCircleAmountSO.Value;
 

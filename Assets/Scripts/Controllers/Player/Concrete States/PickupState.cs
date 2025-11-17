@@ -1,8 +1,10 @@
 using UnityEngine;
 
-public class ExtractingState : PlayerBaseState
+public class PickupState : PlayerBaseState
 {
-    public ExtractingState(Player player) : base(player){ }
+    public PickupState(Player player) : base(player)
+    {
+    }
 
     public override void EnterState()
     {
@@ -11,7 +13,7 @@ public class ExtractingState : PlayerBaseState
 
     public override void UpdateState()
     {
-        player.SetAnimatorBool(Player.IsExtractingHash, true);
+        player.SetAnimatorBool(Player.IsPickingUpHash, true);
 
         ChangeState();
     }
@@ -20,7 +22,7 @@ public class ExtractingState : PlayerBaseState
     {
         base.ChangeState();
 
-        if (!player.CanExtract)
+        if(!player.CanPickup)
         {
             player.StateMachine.SetState("Idle");
             return;
@@ -31,6 +33,6 @@ public class ExtractingState : PlayerBaseState
     {
         base.ExitState();
     }
+
+    
 }
-
-
