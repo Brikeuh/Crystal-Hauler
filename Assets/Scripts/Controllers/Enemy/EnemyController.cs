@@ -8,6 +8,10 @@ public class EnemyController : MonoBehaviour
     public Transform player;
     public Terrain terrain;
 
+    [Header("Character Stats")]
+    [SerializeField] private float health = 100f;
+    [SerializeField] private float attackDamage = 10f;
+
     [Header("Movement Settings")]
     public float speed = 2f; // Enemy speed
     public float stopRadius = 1.25f; // Stopping distance from target
@@ -52,6 +56,8 @@ public class EnemyController : MonoBehaviour
 
     private enum EnemyState { Wandering, Chasing, Attacking, ConsumingCrystal }
     private EnemyState currentState = EnemyState.Wandering;
+
+    public float AttackDamage => attackDamage;
 
     void Start()
     {
@@ -296,9 +302,27 @@ public class EnemyController : MonoBehaviour
         navMeshAgent.speed = runSpeed;
     }
 
-    void ToggleAttack()
+    public void ToggleAttack()
     {
         hurtBox.SetActive(!hurtBox.activeSelf);
+    }
+
+    public void TakeDamage(float damageAmount)
+    {
+        health -= damageAmount;
+        if (health <= 0)
+        {
+            Die();
+        }
+
+        Debug.Log($"{gameObject.name} took {damageAmount} damage. Current health: {health}");
+    }
+
+    private void Die()
+    {
+        Debug.Log($"{gameObject.name} has died.");
+        // Implement death logic (e.g., disable GameObject, play death animation)
+        Destroy(gameObject);
     }
 
     void ClearHurtbox()

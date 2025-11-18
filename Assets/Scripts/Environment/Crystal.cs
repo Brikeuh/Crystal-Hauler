@@ -1,12 +1,7 @@
-using System.Xml.Serialization;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.UI;
 
-public class CrystalController : MonoBehaviour
+public class Crystal : MonoBehaviour
 {
-    InputAction interactAction;
-
     public static float MaxImageFill = 1f; // The maximum fill amount for the image
     public float holdDuration = 1f; // The duration the player needs to hold the interact button, not necessarily equal to MaxImageFill
     private float holdTimer = 0f;
@@ -15,11 +10,6 @@ public class CrystalController : MonoBehaviour
     [Header("Scriptable Objects")]
     [SerializeField] private FloatScriptableObject crystalCountSO;
     [SerializeField] private FloatScriptableObject fillCircleAmountSO;
-
-    private void Start()
-    {
-        interactAction = InputSystem.actions.FindAction("Player/Interact");
-    }
 
     void Rotate()
     {
@@ -30,27 +20,27 @@ public class CrystalController : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Player") && crystalCountSO.Value < maxCrystals)
         {
-            if (interactAction.IsPressed())
+            if (other.gameObject.GetComponent<Player>().InteractPressed)
             {
                 if (holdTimer < MaxImageFill) // Makes sure holdTimer stays within the bounds of the duration and doesn't over-increment
                 {
                     IncrementTimer();
-                    other.gameObject.GetComponent<Animator>().SetBool("isPickingUp", true);
+                    other.gameObject.GetComponent<Player>().CanPickup = true;
                 }
                 else if (fillCircleAmountSO.Value >= MaxImageFill) // If the holdTime is completed, add a crystal to the player
                 {
                     Destroy(gameObject);
                     ClearFillCircle();
                     crystalCountSO.Value++;
-                    other.gameObject.GetComponent<Animator>().SetBool("isPickingUp", false);
+                    other.gameObject.GetComponent<Player>().CanPickup = false;
                 }
             }
-            else if (!interactAction.IsPressed())
+            else if (!other.gameObject.GetComponent<Player>().InteractPressed)
             {
-                if(holdTimer >= 0) // Same as above, but for  over-decrementing
+                if(holdTimer >= 0) // Same as above, but for over-decrementing
                 {
                     DecrementTimer();
-                    other.gameObject.GetComponent<Animator>().SetBool("isPickingUp", false);
+                    other.gameObject.GetComponent<Player>().CanPickup = false;
                 }
             }
         }
@@ -83,6 +73,7 @@ public class CrystalController : MonoBehaviour
 
     void ClearFillCircle()
     {
+        holdTimer = 0f;
         fillCircleAmountSO.Value = 0f;
     }
 
