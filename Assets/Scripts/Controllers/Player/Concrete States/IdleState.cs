@@ -47,7 +47,7 @@ public class IdleState :  PlayerBaseState
             player.StateMachine.SetState("Falling");
             return;
         }
-        else if(player.CanPickup)
+        else if (player.CanPickup)
         {
             player.StateMachine.SetState("Pickup");
             return;
@@ -55,6 +55,11 @@ public class IdleState :  PlayerBaseState
         else if (player.CanExtract)
         {
             player.StateMachine.SetState("Extract");
+            return;
+        }
+        else if (player.AttackPressed && player.CrystalCount > 0f)
+        {
+            player.StateMachine.SetState("Attack");
             return;
         }
 

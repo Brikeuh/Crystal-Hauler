@@ -11,21 +11,12 @@ public class LevelManager : MonoBehaviour
 
     [Header("Level Attributes")]
     [SerializeField] private int levelDuration = 60;
+    [SerializeField] private int targetScore = 10;
 
-    private GameManager gameManager;
     private UIManager uiManager;
-    
+
     private void Awake()
     {
-        if (GameManager.Instance == null)
-        {
-            Debug.LogError("GameManager instance is null. Make sure a GameManager exists in the scene.");
-        }
-        else
-        {
-            gameManager = GameManager.Instance;
-        }
-
         if (UIManager.Instance == null)
         {
             Debug.LogError("UIManager instance is null. Make sure a UIManager exists in the scene.");
@@ -40,13 +31,15 @@ public class LevelManager : MonoBehaviour
     {
         Debug.Log("Level Manager Started");
 
+        Time.timeScale = 1f;
+        Cursor.lockState = CursorLockMode.Locked;
+
         scoreSO.Value = 0;
         crystalCountSO.Value = 0;
         playerHealthSO.Value = 100f;
         timerSO.Value = levelDuration;
 
-        Time.timeScale = 1f;
-        Cursor.lockState = CursorLockMode.Locked;
+        uiManager.SetTargetScore(targetScore);
         StartCoroutine(StartCountdown());
     }
 
@@ -57,7 +50,7 @@ public class LevelManager : MonoBehaviour
 
     void CheckGameState()
     {
-        if (scoreSO.Value >= 1000)
+        if (scoreSO.Value >= targetScore)
         {
             EndLevel(true); 
         }

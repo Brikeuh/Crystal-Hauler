@@ -5,6 +5,7 @@ public class MovementState : PlayerBaseState
     private float horizontalMovement;
     private float verticalMovement;
     private float speed;
+    private float crystalSpeedModifier;
     private Vector3 move;
 
     public MovementState(Player player) : base(player) { }
@@ -20,9 +21,11 @@ public class MovementState : PlayerBaseState
         horizontalMovement = player.MoveValue.x;
         verticalMovement = player.MoveValue.y;
 
+        crystalSpeedModifier = 1 - (player.CrystalCount * 0.08f);
+        
         player.ApplyGravity();
         HandleInput();
-        HandleMovement(speed);
+        HandleMovement(speed * crystalSpeedModifier);
         ChangeState();
     }
 
@@ -33,9 +36,9 @@ public class MovementState : PlayerBaseState
             player.StateMachine.SetState("Idle");
             return;
         }
-        else if (player.Velocity.y < -0.1f && !player.IsGrounded)
+        else if (player.AttackPressed && player.IsGrounded && player.CrystalCount > 0f)
         {
-            player.StateMachine.SetState("Falling");
+            player.StateMachine.SetState("Attack");
             return;
         }
     }
@@ -77,6 +80,15 @@ public class MovementState : PlayerBaseState
         else
         {
             player.SetAnimatorBool(Player.IsJumpingHash, false);
+        }
+
+        if (player.Velocity.y < -0.1f && !player.IsGrounded)
+        {
+            player.SetAnimatorBool(Player.IsFallingHash, true);
+        }
+        else
+        {
+            player.SetAnimatorBool(Player.IsFallingHash, false);
         }
     }
 

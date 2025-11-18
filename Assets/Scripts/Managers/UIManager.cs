@@ -13,7 +13,8 @@ public class UIManager : MonoBehaviour
 
     [Header("HUD Elements")]
     public GameObject HUD;
-    public TextMeshProUGUI scoreText;
+    public TextMeshProUGUI currentScoreText;
+    public TextMeshProUGUI targetScoreText;
     public TextMeshProUGUI timerText;
     public GameObject loadCircle;
     public GameObject playerHealthProgressBar;
@@ -77,8 +78,7 @@ public class UIManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        scoreText.text = "score: " + scoreSO.Value.ToString();
-        //crystalCountText.text = "Crystals: " + crystalCountSO.Value.ToString();
+        currentScoreText.text = scoreSO.Value.ToString();
         DisplayCrystals();
         playerHealthProgressBarImage.fillAmount = playerHealthSO.Value / 100f;
         DisplayTimer();
@@ -95,6 +95,11 @@ public class UIManager : MonoBehaviour
         int minutes = timerSO.Value / 60;
         int seconds = timerSO.Value % 60;
         timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
+    }
+
+    public void SetTargetScore(int value)
+    {
+        targetScoreText.text = value.ToString();
     }
 
     public void ShowGameResults(bool result)
@@ -176,4 +181,5 @@ public class UIManager : MonoBehaviour
 
         }
     }
+
 }
