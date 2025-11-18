@@ -156,7 +156,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -543, y: -244.2}
+  m_AnchoredPosition: {x: -646, y: -367}
   m_SizeDelta: {x: 479.1461, y: 101.174}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &26318443
@@ -1930,7 +1930,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 303.05}
+  m_AnchoredPosition: {x: 0, y: 400}
   m_SizeDelta: {x: 255.0716, y: 95.893}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &383071183
@@ -2277,7 +2277,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -543, y: -244.2}
+  m_AnchoredPosition: {x: -646, y: -367}
   m_SizeDelta: {x: 479.1461, y: 101.174}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &496981818
@@ -2529,7 +2529,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 130}
+  m_AnchoredPosition: {x: 0, y: 175}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &569507217
@@ -2694,10 +2694,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -2769,13 +2769,11 @@ MonoBehaviour:
   playerHealthSO: {fileID: 11400000, guid: 871fa7513534db84d9b2f6a2ca7a1372, type: 2}
   fillCircleAmountSO: {fileID: 11400000, guid: b7860114248f2264ab932b22c2bc1656, type: 2}
   timerSO: {fileID: 11400000, guid: fddfafbda97712245b32edb0692f8562, type: 2}
-  jumpTimerSO: {fileID: 11400000, guid: 48dbd404347c0964a84b97e7a36f87f5, type: 2}
   HUD: {fileID: 546222312}
   currentScoreText: {fileID: 59803572}
   targetScoreText: {fileID: 831316223}
   timerText: {fileID: 383071183}
   loadCircle: {fileID: 569507215}
-  jumpTimerBar: {fileID: 1007441067}
   playerHealthProgressBar: {fileID: 1508388825}
   GameWinPanel: {fileID: 1355830504}
   GameLosePanel: {fileID: 1722583891}
@@ -3934,7 +3932,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.7000122, y: 0}
+  m_AnchoredPosition: {x: 0.6999512, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &947930209
@@ -4989,7 +4987,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 689, y: 303.05}
+  m_AnchoredPosition: {x: 829, y: 400}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1496239864
@@ -5738,7 +5736,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -743.1, y: -344.79}
+  m_AnchoredPosition: {x: -846.1, y: -467.59}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1703168712
