@@ -13,7 +13,7 @@ public class EnemyController : MonoBehaviour
     [SerializeField] private float attackDamage = 10f;
 
     [Header("Movement Settings")]
-    public float speed = 2f; // Enemy speed
+    [SerializeField] public float speed = 2f;
     public float stopRadius = 1.25f; // Stopping distance from target
     private float runSpeed;
     private float runModifier = 1.5f;

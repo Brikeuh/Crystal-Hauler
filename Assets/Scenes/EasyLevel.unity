@@ -525,7 +525,7 @@ MonoBehaviour:
   m_Center: {x: 0, y: 2, z: 0}
   m_LayerMask:
     serializedVersion: 2
-    m_Bits: 63
+    m_Bits: 8
   m_UseGeometry: 0
   m_DefaultArea: 0
   m_GenerateLinks: 0
@@ -1827,7 +1827,7 @@ CharacterController:
   serializedVersion: 3
   m_Height: 1.8
   m_Radius: 0.5
-  m_SlopeLimit: 45
+  m_SlopeLimit: 55
   m_StepOffset: 0
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0
@@ -1906,7 +1906,7 @@ MonoBehaviour:
   moveSpeed: 3
   runModifier: 1.5
   rotationRate: 15
-  jumpForce: 5
+  jumpForce: 3
   jumpCooldown: 3
   gravity: -20
   cameraTransform: {fileID: 1259478406}
