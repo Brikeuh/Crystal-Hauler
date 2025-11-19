@@ -1,4 +1,6 @@
 using JetBrains.Annotations;
+using System.Collections;
+using Unity.Services.Analytics;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -46,6 +48,7 @@ public class EnemyController : MonoBehaviour
     private GameObject targetCrystal;
     private GameObject hurtBox;
     private Renderer stateIndicator;
+    private Coroutine stunCoroutine;
 
     private float timer;
     private float attackTimer;
@@ -54,7 +57,9 @@ public class EnemyController : MonoBehaviour
     private float consumptionTimer = 0f;
     private bool isConsuming = false;
 
-    private enum EnemyState { Wandering, Chasing, Attacking, ConsumingCrystal }
+    private bool isStunned = false;
+
+    private enum EnemyState { Wandering, Chasing, Attacking, ConsumingCrystal}
     private EnemyState currentState = EnemyState.Wandering;
 
     public float AttackDamage => attackDamage;
@@ -314,7 +319,7 @@ public class EnemyController : MonoBehaviour
         {
             Die();
         }
-
+        StartCoroutine(StunCountdown());
         Debug.Log($"{gameObject.name} took {damageAmount} damage. Current health: {health}");
     }
 
@@ -376,5 +381,51 @@ public class EnemyController : MonoBehaviour
         // Wander radius - Blue
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.position, wanderRadius);
+    }
+
+    public void StunEnemy()
+    {
+        if (stunCoroutine != null)
+        {
+            StopCoroutine(StunCountdown());
+        }
+
+        stunCoroutine = StartCoroutine(StunCountdown());
+    }
+
+    IEnumerator StunCountdown()
+    {
+        isStunned = true;
+
+        if (navMeshAgent != null) 
+        {
+            Stunned();
+        }
+
+        yield return new WaitForSeconds(3f);
+
+        if (navMeshAgent != null)
+        {
+            EndStun();
+        }
+
+        isStunned = false;
+        stunCoroutine = null;
+    }
+    
+    public void Stunned()
+    {
+        //currentState = EnemyState.Wandering;
+        navMeshAgent.isStopped = true;
+        navMeshAgent.velocity = Vector3.zero;
+        navMeshAgent.speed = 0f;
+        animator.SetBool("isStunned", true);
+    }
+
+    public void EndStun()
+    {
+        navMeshAgent.speed = speed;
+        navMeshAgent.isStopped = false;
+        animator.SetBool("isStunned", false);
     }
 }
