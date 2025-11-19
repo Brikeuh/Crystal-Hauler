@@ -105,72 +105,76 @@ public class EnemyController : MonoBehaviour
         // State transitions
         EnemyState previousState = currentState;
 
-        // Priority: Attacking > Chasing > Wandering > Crystal (lowest)
-        if (distanceToPlayer <= stopRadius)
+        if (!isStunned)
         {
-            currentState = EnemyState.Attacking;
-            // Cancel crystal consumption if player gets too close
-            if (targetCrystal != null)
+            // Priority: Attacking > Chasing > Wandering > Crystal (lowest)
+            if (distanceToPlayer <= stopRadius)
             {
-                targetCrystal = null;
-                isConsuming = false;
+                currentState = EnemyState.Attacking;
+                // Cancel crystal consumption if player gets too close
+                if (targetCrystal != null)
+                {
+                    targetCrystal = null;
+                    isConsuming = false;
+                }
             }
-        }
-        else if (distanceToPlayer <= chaseDistance && canMove)
-        {
-            currentState = EnemyState.Chasing;
-            // Cancel crystal consumption if player is in chase range
-            if (targetCrystal != null)
+            else if (distanceToPlayer <= chaseDistance && canMove)
             {
-                targetCrystal = null;
-                isConsuming = false;
+                currentState = EnemyState.Chasing;
+                // Cancel crystal consumption if player is in chase range
+                if (targetCrystal != null)
+                {
+                    targetCrystal = null;
+                    isConsuming = false;
+                }
             }
-        }
-        else if (targetCrystal != null && canMove)
-        {
-            // Go for crystal only if player is far away
-            float distanceToCrystal = Vector3.Distance(transform.position, targetCrystal.transform.position);
-            if (distanceToCrystal <= crystalConsumptionRange)
+            else if (targetCrystal != null && canMove)
             {
-                currentState = EnemyState.ConsumingCrystal;
-                isConsuming = true;
-                consumptionTimer = 0f;
+                // Go for crystal only if player is far away
+                float distanceToCrystal = Vector3.Distance(transform.position, targetCrystal.transform.position);
+                if (distanceToCrystal <= crystalConsumptionRange)
+                {
+                    currentState = EnemyState.ConsumingCrystal;
+                    isConsuming = true;
+                    consumptionTimer = 0f;
+                }
+                else
+                {
+                    // Move towards crystal if decided to consume it
+                    currentState = EnemyState.ConsumingCrystal;
+                }
             }
-            else
+            else if (canMove)
             {
-                // Move towards crystal if decided to consume it
-                currentState = EnemyState.ConsumingCrystal;
+                currentState = EnemyState.Wandering;
             }
-        }
-        else if (canMove)
-        {
-            currentState = EnemyState.Wandering;
-        }
+        
 
-        // Update color if state changed
-        if (previousState != currentState)
-        {
-            UpdateColor();
-        }
+            // Update color if state changed
+            if (previousState != currentState)
+            {
+                UpdateColor();
+            }
 
-        // State behaviors
-        switch (currentState)
-        {
-            case EnemyState.Wandering:
-                Wander();
-                break;
-            case EnemyState.Chasing:
-                Chase();
-                break;
-            case EnemyState.Attacking:
-                Attack();
-                break;
-            case EnemyState.ConsumingCrystal:
-                ConsumeCrystal();
-                break;
-            default:
-                Wander();
-                break;
+            // State behaviors
+            switch (currentState)
+            {
+                case EnemyState.Wandering:
+                    Wander();
+                    break;
+                case EnemyState.Chasing:
+                    Chase();
+                    break;
+                case EnemyState.Attacking:
+                    Attack();
+                    break;
+                case EnemyState.ConsumingCrystal:
+                    ConsumeCrystal();
+                    break;
+                default:
+                    Wander();
+                    break;
+            }
         }
     }
 
@@ -415,7 +419,7 @@ public class EnemyController : MonoBehaviour
     
     public void Stunned()
     {
-        //currentState = EnemyState.Wandering;
+        isStunned = true;
         navMeshAgent.isStopped = true;
         navMeshAgent.velocity = Vector3.zero;
         navMeshAgent.speed = 0f;
@@ -424,6 +428,7 @@ public class EnemyController : MonoBehaviour
 
     public void EndStun()
     {
+        isStunned = false;
         navMeshAgent.speed = speed;
         navMeshAgent.isStopped = false;
         animator.SetBool("isStunned", false);
