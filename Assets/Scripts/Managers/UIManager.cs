@@ -147,6 +147,11 @@ public class UIManager : MonoBehaviour
         GameQuitModal.SetActive(true);
     }
 
+    public void ExitQuitModal()
+    {
+        GameQuitModal.SetActive(false);
+    }
+
     public void QuitToMainMenu()
     {
         gameManager.Load(GameManager.GameModeScene.MainMenu);
