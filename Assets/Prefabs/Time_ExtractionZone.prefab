@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3135142000403436588}
   - component: {fileID: 4081577605321999257}
   m_Layer: 0
-  m_Name: ExtractionZone
+  m_Name: Time_ExtractionZone
   m_TagString: Extractor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -143,7 +143,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: 44f104d811c68e148bb5f477a700933f, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 57e7fbd70ab6bdc4a89f9bbfb1fbb1f7, type: 2}
+      objectReference: {fileID: 2100000, guid: 4f6327df6f11eb34dbe3309a86d99bfe, type: 2}
     - target: {fileID: 919132149155446097, guid: 44f104d811c68e148bb5f477a700933f, type: 3}
       propertyPath: m_Name
       value: IceCave
@@ -151,13 +151,43 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 44f104d811c68e148bb5f477a700933f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5511186160915707027}
   m_SourcePrefab: {fileID: 100100000, guid: 44f104d811c68e148bb5f477a700933f, type: 3}
 --- !u!4 &5015268855896088485 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 44f104d811c68e148bb5f477a700933f, type: 3}
   m_PrefabInstance: {fileID: 4761264742838401102}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &5679603039094457631 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 44f104d811c68e148bb5f477a700933f, type: 3}
+  m_PrefabInstance: {fileID: 4761264742838401102}
+  m_PrefabAsset: {fileID: 0}
+--- !u!64 &5511186160915707027
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5679603039094457631}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 944399206794987553, guid: 44f104d811c68e148bb5f477a700933f, type: 3}
 --- !u!1001 &8505685886066289451
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -3,8 +3,8 @@ using UnityEngine;
 public class ProjectileCrystal : MonoBehaviour
 {
     [Header("Lifetime Settings")]
-    [SerializeField] private float maxLifetime = 5f;
-    [SerializeField] private float attackDamage = 25f;
+    public float maxLifetime = 5f;
+    public float damage;
 
     private void Start()
     {
@@ -22,7 +22,7 @@ public class ProjectileCrystal : MonoBehaviour
         else if (other.CompareTag("Enemy"))
         {
             Debug.Log($"Projectile hit: {other.gameObject.name}");
-            other.gameObject.GetComponent<EnemyController>().TakeDamage(attackDamage);
+            other.gameObject.GetComponent<EnemyController>().TakeDamage(damage);
         }
         
         // Destroy the projectile
