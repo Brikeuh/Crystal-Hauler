@@ -31,6 +31,11 @@ public class PlayerStateMachine
         }
     }
 
+    public PlayerBaseState GetState()
+    {
+        return currentState;
+    }
+
     public void Update() // Called in Player.Update(), functions as the state machine's Update loop
     {
         if (currentState != null) 

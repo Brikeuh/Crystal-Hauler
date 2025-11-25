@@ -10,6 +10,8 @@ TagManager:
   - Extractor
   - LoadCircle
   - Hurtboxes
+  - PlayerEyes
+  - PostProcessingVolume
   layers:
   - Default
   - TransparentFX
@@ -19,9 +21,9 @@ TagManager:
   - UI
   - Units
   - Player
-  - 
-  - 
-  - 
+  - Lights
+  - Camera
+  - PostProcessing
   - 
   - 
   - 

@@ -2,40 +2,79 @@ using UnityEngine;
 
 public class ExtractionPoint : MonoBehaviour
 {
-    public float MaxImageFill = 1f;
-    public float holdDuration = 5f;
-    private float holdTimer = 0f;
-
+    [Header("Scriptable Objects")]
     [SerializeField] private FloatScriptableObject crystalCountSO;
     [SerializeField] private FloatScriptableObject scoreSO;
     [SerializeField] private FloatScriptableObject fillCircleAmountSO;
+    [SerializeField] private FloatScriptableObject playerHealthSO;
+    [SerializeField] private IntScriptableObject timerSO;
+
+    [Header("Extraction Settings")]
+    [SerializeField] private int extractLimit = 5;
+    [SerializeField] private PowerupType powerUp;
+
+    private enum PowerupType { None, Speed, Time, Damage, Health }
+
+    public Material newMaterial;
+
+    private float holdDuration;
+    private float MaxImageFill = 1f;
+    private float holdTimer = 0f;
+    private float crystalsExtracted = 0f;
+    private GameObject cave;
+    private MeshRenderer caveMeshRenderer;
+
+    public int ExtractLimit => extractLimit;
+    private void Start()
+    {
+        cave = this.transform.GetChild(1).gameObject;
+        caveMeshRenderer = cave.GetComponent<MeshRenderer>();
+    }
+
+    private void Update()
+    {
+        holdDuration = crystalCountSO.Value;
+    }
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.gameObject.CompareTag("Player") && crystalCountSO.Value > 0)
+        if (other.gameObject.CompareTag("Player"))
         {
-            if (other.gameObject.GetComponent<Player>().InteractPressed)
+            Player player = other.gameObject.GetComponent<Player>();
+
+            if (player.CurrentStateName != "MovementState" && player.CurrentStateName != "FallingState" && crystalCountSO.Value > 0)
             {
-                if (holdTimer < MaxImageFill) // Makes sure holdTimer stays within the bounds of the duration and doesn't over-increment
+                if (player.InteractPressed)
                 {
-                    IncrementTimer();
-                    other.gameObject.GetComponent<Player>().CanExtract = true;
+                    if (holdTimer < MaxImageFill) // Makes sure holdTimer stays within the bounds of the duration and doesn't over-increment
+                    {
+                        IncrementTimer();
+                        player.CanExtract = true;
+                    }
+                    else if (fillCircleAmountSO.Value >= MaxImageFill)
+                    {
+                        ClearFillCircle();
+                        scoreSO.Value += crystalCountSO.Value;
+                        crystalsExtracted += crystalCountSO.Value;
+                        crystalCountSO.Value = 0;
+                        player.CanExtract = false;
+                    }
                 }
-                else if (fillCircleAmountSO.Value >= MaxImageFill)
+                else if (!player.InteractPressed)
                 {
-                    ClearFillCircle();
-                    scoreSO.Value += crystalCountSO.Value;
-                    crystalCountSO.Value = 0;
-                    other.gameObject.GetComponent<Player>().CanExtract = false;
+                    if (holdTimer >= 0) // Same as above, but for  over-decrementing
+                    {
+                        DecrementTimer();
+                        player.CanExtract = false;
+                    }
                 }
             }
-            else if (!other.gameObject.GetComponent<Player>().InteractPressed)
+
+            if (crystalsExtracted >= extractLimit)
             {
-                if (holdTimer >= 0) // Same as above, but for  over-decrementing
-                {
-                    DecrementTimer();
-                    other.gameObject.GetComponent<Player>().CanExtract = false;
-                }
+                this.GetComponent<Collider>().enabled = false;
+                caveMeshRenderer.material = newMaterial;
+                ApplyPowerup(player);
             }
         }
     }
@@ -64,5 +103,26 @@ public class ExtractionPoint : MonoBehaviour
     {
         holdTimer = 0f;
         fillCircleAmountSO.Value = 0f;
+    }
+
+    void ApplyPowerup(Player player)
+    {
+        switch (powerUp)
+        {
+            case PowerupType.Speed:
+                player.MoveSpeed *= 1.25f;
+                break;
+            case PowerupType.Damage:
+                player.AttackDamage *= 2f;
+                break;
+            case PowerupType.Health:
+                playerHealthSO.Value = player.MaxHealth;
+                break;
+            case PowerupType.Time:
+                timerSO.Value += 30;
+                break;
+            default:
+                break;
+        }
     }
 }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class Crystal : MonoBehaviour
 {
@@ -18,35 +19,40 @@ public class Crystal : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.gameObject.CompareTag("Player") && crystalCountSO.Value < maxCrystals)
+        if (other.gameObject.CompareTag("Player"))
         {
-            if (other.gameObject.GetComponent<Player>().InteractPressed)
+            Player player = other.gameObject.GetComponent<Player>();
+
+            if (player.CurrentStateName != "MovementState" && player.CurrentStateName != "FallingState" && crystalCountSO.Value < maxCrystals)
             {
-                if (holdTimer < MaxImageFill) // Makes sure holdTimer stays within the bounds of the duration and doesn't over-increment
+                if (player.InteractPressed)
                 {
-                    IncrementTimer();
-                    other.gameObject.GetComponent<Player>().CanPickup = true;
+                    if (holdTimer < MaxImageFill) // Makes sure holdTimer stays within the bounds of the duration and doesn't over-increment
+                    {
+                        IncrementTimer();
+                        player.CanPickup = true;
+                    }
+                    else if (fillCircleAmountSO.Value >= MaxImageFill) // If the holdTime is completed, add a crystal to the player
+                    {
+                        Destroy(gameObject);
+                        ClearFillCircle();
+                        crystalCountSO.Value++;
+                        player.CanPickup = false;
+                    }
                 }
-                else if (fillCircleAmountSO.Value >= MaxImageFill) // If the holdTime is completed, add a crystal to the player
+                else if (!player.InteractPressed)
                 {
-                    Destroy(gameObject);
-                    ClearFillCircle();
-                    crystalCountSO.Value++;
-                    other.gameObject.GetComponent<Player>().CanPickup = false;
+                    if (holdTimer >= 0) // Same as above, but for over-decrementing
+                    {
+                        DecrementTimer();
+                        player.CanPickup = false;
+                    }
                 }
             }
-            else if (!other.gameObject.GetComponent<Player>().InteractPressed)
+            else if (other.gameObject.CompareTag("Player") && crystalCountSO.Value >= maxCrystals)
             {
-                if(holdTimer >= 0) // Same as above, but for over-decrementing
-                {
-                    DecrementTimer();
-                    other.gameObject.GetComponent<Player>().CanPickup = false;
-                }
+                Debug.Log("Crystal Limit Reached!");
             }
-        }
-        else if(other.gameObject.CompareTag("Player") && crystalCountSO.Value >= maxCrystals)
-        {
-            Debug.Log("Crystal Limit Reached!");
         }
     }
 

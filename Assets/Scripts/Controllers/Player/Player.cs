@@ -7,6 +7,7 @@ public class Player : MonoBehaviour
 {
     [Header("Player Properties")]
     [SerializeField] private float maxHealth = 100f;
+    [SerializeField] private float attackDamage = 25f;
 
     [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 5f;
@@ -56,6 +57,8 @@ public class Player : MonoBehaviour
     private bool attackFinished; // helper bool that is called when the attack animation is completed.
 
     private float nextJumpTime = 0f;
+    
+    private string currentStateName;
 
     private static readonly int isWalkingHash = Animator.StringToHash("isWalking");
     private static readonly int isRunningHash = Animator.StringToHash("isRunning");
@@ -78,13 +81,16 @@ public class Player : MonoBehaviour
     public bool CanExtract { get => canExtract; set => canExtract = value; }
     public float CrystalCount { get => crystalCountSO.Value; set => crystalCountSO.Value = value; }
     public float FillCircleAmount => fillCircleAmountSO.Value;
-    public float MoveSpeed => moveSpeed;
+    public float MoveSpeed { get => moveSpeed; set => moveSpeed = value; }
+    public float AttackDamage { get => attackDamage; set => attackDamage = value; }
+    public float MaxHealth { get => maxHealth; set => maxHealth = value; }
     public float RunModifier => runModifier;
     public float JumpForce => jumpForce;
     public float JumpCooldown => jumpCooldown;
     public float NextJumpTime { get => nextJumpTime; set => nextJumpTime = value; }
     public float Gravity => gravity;
     public float RotationRate => rotationRate;
+    public string CurrentStateName => currentStateName;
     public Vector2 MoveValue => moveValue;
     public Vector3 Velocity => velocity;
     public PlayerStateMachine StateMachine => stateMachine;
@@ -146,6 +152,8 @@ public class Player : MonoBehaviour
         UpdateMovementInput();
         CheckGroundStatus();
         stateMachine.Update();
+        currentStateName = stateMachine.GetState().ToString();
+        //Debug.Log(currentStateName);
     }
 
     private void CheckGroundStatus()
@@ -245,6 +253,8 @@ public class Player : MonoBehaviour
 
         // Instantiate projectile with rotation
         GameObject projectile = Instantiate(projectilePrefab, spawnPos, rotation);
+
+        projectile.gameObject.GetComponent<ProjectileCrystal>().damage = attackDamage;
 
         // Apply force in the specified direction
         Vector3 forceDirection = transform.TransformDirection(direction.normalized);

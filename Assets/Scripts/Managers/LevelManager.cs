@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class LevelManager : MonoBehaviour
@@ -8,10 +9,13 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private FloatScriptableObject crystalCountSO;
     [SerializeField] private FloatScriptableObject playerHealthSO;
     [SerializeField] private IntScriptableObject timerSO;
+    [SerializeField] private IntScriptableObject enemiesDefeatedSO;
 
     [Header("Level Attributes")]
     [SerializeField] private int levelDuration = 60;
-    [SerializeField] private int targetScore = 10;
+    [SerializeField] private GameObject extractionPoints;
+
+    private int targetScore;
 
     private UIManager uiManager;
 
@@ -38,6 +42,10 @@ public class LevelManager : MonoBehaviour
         crystalCountSO.Value = 0;
         playerHealthSO.Value = 100f;
         timerSO.Value = levelDuration;
+        enemiesDefeatedSO.Value = 0;
+
+        targetScore = CalculateMaxScore(GetExtractionPointChildren());
+        //Debug.Log(targetScore);
 
         uiManager.SetTargetScore(targetScore);
         StartCoroutine(StartCountdown());
@@ -67,6 +75,35 @@ public class LevelManager : MonoBehaviour
 
         uiManager.ShowGameResults(result);
         this.enabled = false; // Disable further updates
+    }
+
+    public int CalculateMaxScore(Transform[] extractionPoints)
+    {
+        int score = 0;
+        for (int i = 0; i < extractionPoints.Length; i++)
+        {
+            score += extractionPoints[i].GetComponent<ExtractionPoint>().ExtractLimit;
+        }
+        return score;
+    }
+
+    public Transform[] GetExtractionPointChildren()
+    {
+        if (extractionPoints == null)
+        {
+            Debug.LogWarning("Target object is not assigned!");
+            return new Transform[0];
+        }
+
+        List<Transform> children = new List<Transform>();
+        Transform targetTransform = extractionPoints.transform;
+
+        foreach (Transform child in targetTransform)
+        {
+            children.Add(child);
+        }
+
+        return children.ToArray();
     }
 
     IEnumerator StartCountdown()

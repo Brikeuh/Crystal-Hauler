@@ -1,12 +1,16 @@
 using JetBrains.Annotations;
+using System.Collections;
+using Unity.Services.Analytics;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 public class EnemyController : MonoBehaviour
 {
     [Header("References")]
-    public Transform player;
-    public Terrain terrain;
+    private Transform playerTransform;
+    private Terrain terrain;
+    public Image healthBarImage;
 
     [Header("Character Stats")]
     [SerializeField] private float health = 100f;
@@ -35,6 +39,8 @@ public class EnemyController : MonoBehaviour
     public float wanderRadius = 20f; // How far to wander
     public float wanderTimer = 5f; // Time before choosing new wander point
 
+    [SerializeField] private IntScriptableObject enemiesDefeatedSO;
+
     // Colors for different states
     private Color wanderingColor = Color.green;
     private Color chasingColor = Color.yellow;
@@ -46,6 +52,7 @@ public class EnemyController : MonoBehaviour
     private GameObject targetCrystal;
     private GameObject hurtBox;
     private Renderer stateIndicator;
+    private Coroutine stunCoroutine;
 
     private float timer;
     private float attackTimer;
@@ -54,13 +61,17 @@ public class EnemyController : MonoBehaviour
     private float consumptionTimer = 0f;
     private bool isConsuming = false;
 
-    private enum EnemyState { Wandering, Chasing, Attacking, ConsumingCrystal }
+    private bool isStunned = false;
+
+    private enum EnemyState { Wandering, Chasing, Attacking, ConsumingCrystal}
     private EnemyState currentState = EnemyState.Wandering;
 
     public float AttackDamage => attackDamage;
 
     void Start()
     {
+        playerTransform = GameObject.FindWithTag("Player").transform;
+        //terrain = GameObject.FindWithTag("")
         navMeshAgent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
         hurtBox = this.transform.GetChild(0).gameObject;
@@ -72,12 +83,12 @@ public class EnemyController : MonoBehaviour
         attackTimer = attackCooldown;
 
         SetNewWanderPoint();
-        UpdateColor();
+        //UpdateColor();
     }
 
     void Update()
     {
-        if (player == null) return;
+        if (playerTransform == null) return;
 
         // Update attack cooldown
         if (attackTimer > 0)
@@ -85,7 +96,7 @@ public class EnemyController : MonoBehaviour
             attackTimer -= Time.deltaTime;
         }
 
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+        float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
 
         // Check for nearby crystals (only if not already consuming and no target)
         if (currentState != EnemyState.ConsumingCrystal && targetCrystal == null)
@@ -100,72 +111,76 @@ public class EnemyController : MonoBehaviour
         // State transitions
         EnemyState previousState = currentState;
 
-        // Priority: Attacking > Chasing > Wandering > Crystal (lowest)
-        if (distanceToPlayer <= stopRadius)
+        if (!isStunned)
         {
-            currentState = EnemyState.Attacking;
-            // Cancel crystal consumption if player gets too close
-            if (targetCrystal != null)
+            // Priority: Attacking > Chasing > Wandering > Crystal (lowest)
+            if (distanceToPlayer <= stopRadius)
             {
-                targetCrystal = null;
-                isConsuming = false;
+                currentState = EnemyState.Attacking;
+                // Cancel crystal consumption if player gets too close
+                if (targetCrystal != null)
+                {
+                    targetCrystal = null;
+                    isConsuming = false;
+                }
             }
-        }
-        else if (distanceToPlayer <= chaseDistance && canMove)
-        {
-            currentState = EnemyState.Chasing;
-            // Cancel crystal consumption if player is in chase range
-            if (targetCrystal != null)
+            else if (distanceToPlayer <= chaseDistance && canMove)
             {
-                targetCrystal = null;
-                isConsuming = false;
+                currentState = EnemyState.Chasing;
+                // Cancel crystal consumption if player is in chase range
+                if (targetCrystal != null)
+                {
+                    targetCrystal = null;
+                    isConsuming = false;
+                }
             }
-        }
-        else if (targetCrystal != null && canMove)
-        {
-            // Go for crystal only if player is far away
-            float distanceToCrystal = Vector3.Distance(transform.position, targetCrystal.transform.position);
-            if (distanceToCrystal <= crystalConsumptionRange)
+            else if (targetCrystal != null && canMove)
             {
-                currentState = EnemyState.ConsumingCrystal;
-                isConsuming = true;
-                consumptionTimer = 0f;
+                // Go for crystal only if player is far away
+                float distanceToCrystal = Vector3.Distance(transform.position, targetCrystal.transform.position);
+                if (distanceToCrystal <= crystalConsumptionRange)
+                {
+                    currentState = EnemyState.ConsumingCrystal;
+                    isConsuming = true;
+                    consumptionTimer = 0f;
+                }
+                else
+                {
+                    // Move towards crystal if decided to consume it
+                    currentState = EnemyState.ConsumingCrystal;
+                }
             }
-            else
+            else if (canMove)
             {
-                // Move towards crystal if decided to consume it
-                currentState = EnemyState.ConsumingCrystal;
+                currentState = EnemyState.Wandering;
             }
-        }
-        else if (canMove)
-        {
-            currentState = EnemyState.Wandering;
-        }
+        
 
-        // Update color if state changed
-        if (previousState != currentState)
-        {
-            UpdateColor();
-        }
+            // Update color if state changed
+            if (previousState != currentState)
+            {
+                UpdateColor();
+            }
 
-        // State behaviors
-        switch (currentState)
-        {
-            case EnemyState.Wandering:
-                Wander();
-                break;
-            case EnemyState.Chasing:
-                Chase();
-                break;
-            case EnemyState.Attacking:
-                Attack();
-                break;
-            case EnemyState.ConsumingCrystal:
-                ConsumeCrystal();
-                break;
-            default:
-                Wander();
-                break;
+            // State behaviors
+            switch (currentState)
+            {
+                case EnemyState.Wandering:
+                    Wander();
+                    break;
+                case EnemyState.Chasing:
+                    Chase();
+                    break;
+                case EnemyState.Attacking:
+                    Attack();
+                    break;
+                case EnemyState.ConsumingCrystal:
+                    ConsumeCrystal();
+                    break;
+                default:
+                    Wander();
+                    break;
+            }
         }
     }
 
@@ -189,15 +204,15 @@ public class EnemyController : MonoBehaviour
     {
         SetRun();
         navMeshAgent.stoppingDistance = stopRadius;
-        AlignRotation(player.position);
-        navMeshAgent.SetDestination(player.position);
+        AlignRotation(playerTransform.position);
+        navMeshAgent.SetDestination(playerTransform.position);
     }
 
     void Attack()
     {
         // Look at player
         navMeshAgent.stoppingDistance = stopRadius;
-        AlignRotation(player.position);
+        AlignRotation(playerTransform.position);
 
         canMove = false;
         
@@ -228,15 +243,15 @@ public class EnemyController : MonoBehaviour
             wanderPoint = hit.position;
 
             // Ensure the point is within terrain bounds if terrain exists
-            if (terrain != null)
-            {
-                Vector3 terrainPos = terrain.transform.position;
-                TerrainData terrainData = terrain.terrainData;
+            //if (terrain != null)
+            //{
+            //    Vector3 terrainPos = terrain.transform.position;
+            //    TerrainData terrainData = terrain.terrainData;
 
-                wanderPoint.x = Mathf.Clamp(wanderPoint.x, terrainPos.x, terrainPos.x + terrainData.size.x);
-                wanderPoint.z = Mathf.Clamp(wanderPoint.z, terrainPos.z, terrainPos.z + terrainData.size.z);
-                wanderPoint.y = terrain.SampleHeight(wanderPoint) + terrainPos.y;
-            }
+            //    wanderPoint.x = Mathf.Clamp(wanderPoint.x, terrainPos.x, terrainPos.x + terrainData.size.x);
+            //    wanderPoint.z = Mathf.Clamp(wanderPoint.z, terrainPos.z, terrainPos.z + terrainData.size.z);
+            //    wanderPoint.y = terrain.SampleHeight(wanderPoint) + terrainPos.y;
+            //}
         }
     }
 
@@ -312,17 +327,18 @@ public class EnemyController : MonoBehaviour
         health -= damageAmount;
         if (health <= 0)
         {
-            Die();
+            animator.SetBool("isDead", true);
         }
-
+        healthBarImage.fillAmount = health / 100f;
+        StartCoroutine(StunCountdown());
         Debug.Log($"{gameObject.name} took {damageAmount} damage. Current health: {health}");
     }
 
-    private void Die()
+    public void Die()
     {
         Debug.Log($"{gameObject.name} has died.");
-        // Implement death logic (e.g., disable GameObject, play death animation)
         Destroy(gameObject);
+        enemiesDefeatedSO.Value++;
     }
 
     void ClearHurtbox()
@@ -376,5 +392,52 @@ public class EnemyController : MonoBehaviour
         // Wander radius - Blue
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.position, wanderRadius);
+    }
+
+    public void StunEnemy()
+    {
+        if (stunCoroutine != null)
+        {
+            StopCoroutine(StunCountdown());
+        }
+
+        stunCoroutine = StartCoroutine(StunCountdown());
+    }
+
+    IEnumerator StunCountdown()
+    {
+        isStunned = true;
+
+        if (navMeshAgent != null) 
+        {
+            Stunned();
+        }
+
+        yield return new WaitForSeconds(3f);
+
+        if (navMeshAgent != null)
+        {
+            EndStun();
+        }
+
+        isStunned = false;
+        stunCoroutine = null;
+    }
+    
+    public void Stunned()
+    {
+        isStunned = true;
+        navMeshAgent.isStopped = true;
+        navMeshAgent.velocity = Vector3.zero;
+        navMeshAgent.speed = 0f;
+        animator.SetBool("isStunned", true);
+    }
+
+    public void EndStun()
+    {
+        isStunned = false;
+        navMeshAgent.speed = speed;
+        navMeshAgent.isStopped = false;
+        animator.SetBool("isStunned", false);
     }
 }
