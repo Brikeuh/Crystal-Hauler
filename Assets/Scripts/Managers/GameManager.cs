@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
         UI,
         LevelSelection,
         Settings,
+        Tutorial,
         EasyLevel,
         MediumLevel,
         HardLevel,
@@ -35,6 +36,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         Load(GameModeScene.MainMenu);
+        LoadAsync(GameModeScene.UI);
     }
 
     public void Load(GameModeScene scene)
@@ -59,6 +61,18 @@ public class GameManager : MonoBehaviour
         {
             Scene scene = SceneManager.GetSceneAt(i);
             SceneManager.LoadScene(scene.name, LoadSceneMode.Additive);
+        }
+    }
+
+    public bool GetScene(string sceneName)
+    {
+        if (SceneManager.GetSceneByName(sceneName).isLoaded)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 

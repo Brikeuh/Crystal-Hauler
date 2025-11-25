@@ -3,12 +3,14 @@ using System.Collections;
 using Unity.Services.Analytics;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 public class EnemyController : MonoBehaviour
 {
     [Header("References")]
-    public Transform player;
-    public Terrain terrain;
+    private Transform playerTransform;
+    private Terrain terrain;
+    public Image healthBarImage;
 
     [Header("Character Stats")]
     [SerializeField] private float health = 100f;
@@ -36,6 +38,8 @@ public class EnemyController : MonoBehaviour
     [Header("Wandering Settings")]
     public float wanderRadius = 20f; // How far to wander
     public float wanderTimer = 5f; // Time before choosing new wander point
+
+    [SerializeField] private IntScriptableObject enemiesDefeatedSO;
 
     // Colors for different states
     private Color wanderingColor = Color.green;
@@ -66,6 +70,8 @@ public class EnemyController : MonoBehaviour
 
     void Start()
     {
+        playerTransform = GameObject.FindWithTag("Player").transform;
+        //terrain = GameObject.FindWithTag("")
         navMeshAgent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
         hurtBox = this.transform.GetChild(0).gameObject;
@@ -77,12 +83,12 @@ public class EnemyController : MonoBehaviour
         attackTimer = attackCooldown;
 
         SetNewWanderPoint();
-        UpdateColor();
+        //UpdateColor();
     }
 
     void Update()
     {
-        if (player == null) return;
+        if (playerTransform == null) return;
 
         // Update attack cooldown
         if (attackTimer > 0)
@@ -90,7 +96,7 @@ public class EnemyController : MonoBehaviour
             attackTimer -= Time.deltaTime;
         }
 
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+        float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
 
         // Check for nearby crystals (only if not already consuming and no target)
         if (currentState != EnemyState.ConsumingCrystal && targetCrystal == null)
@@ -198,15 +204,15 @@ public class EnemyController : MonoBehaviour
     {
         SetRun();
         navMeshAgent.stoppingDistance = stopRadius;
-        AlignRotation(player.position);
-        navMeshAgent.SetDestination(player.position);
+        AlignRotation(playerTransform.position);
+        navMeshAgent.SetDestination(playerTransform.position);
     }
 
     void Attack()
     {
         // Look at player
         navMeshAgent.stoppingDistance = stopRadius;
-        AlignRotation(player.position);
+        AlignRotation(playerTransform.position);
 
         canMove = false;
         
@@ -237,15 +243,15 @@ public class EnemyController : MonoBehaviour
             wanderPoint = hit.position;
 
             // Ensure the point is within terrain bounds if terrain exists
-            if (terrain != null)
-            {
-                Vector3 terrainPos = terrain.transform.position;
-                TerrainData terrainData = terrain.terrainData;
+            //if (terrain != null)
+            //{
+            //    Vector3 terrainPos = terrain.transform.position;
+            //    TerrainData terrainData = terrain.terrainData;
 
-                wanderPoint.x = Mathf.Clamp(wanderPoint.x, terrainPos.x, terrainPos.x + terrainData.size.x);
-                wanderPoint.z = Mathf.Clamp(wanderPoint.z, terrainPos.z, terrainPos.z + terrainData.size.z);
-                wanderPoint.y = terrain.SampleHeight(wanderPoint) + terrainPos.y;
-            }
+            //    wanderPoint.x = Mathf.Clamp(wanderPoint.x, terrainPos.x, terrainPos.x + terrainData.size.x);
+            //    wanderPoint.z = Mathf.Clamp(wanderPoint.z, terrainPos.z, terrainPos.z + terrainData.size.z);
+            //    wanderPoint.y = terrain.SampleHeight(wanderPoint) + terrainPos.y;
+            //}
         }
     }
 
@@ -321,17 +327,18 @@ public class EnemyController : MonoBehaviour
         health -= damageAmount;
         if (health <= 0)
         {
-            Die();
+            animator.SetBool("isDead", true);
         }
+        healthBarImage.fillAmount = health / 100f;
         StartCoroutine(StunCountdown());
         Debug.Log($"{gameObject.name} took {damageAmount} damage. Current health: {health}");
     }
 
-    private void Die()
+    public void Die()
     {
         Debug.Log($"{gameObject.name} has died.");
-        // Implement death logic (e.g., disable GameObject, play death animation)
         Destroy(gameObject);
+        enemiesDefeatedSO.Value++;
     }
 
     void ClearHurtbox()

@@ -7,6 +7,7 @@ public class Player : MonoBehaviour
 {
     [Header("Player Properties")]
     [SerializeField] private float maxHealth = 100f;
+    [SerializeField] private float attackDamage = 25f;
 
     [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 5f;
@@ -56,7 +57,7 @@ public class Player : MonoBehaviour
     private bool attackFinished; // helper bool that is called when the attack animation is completed.
 
     private float nextJumpTime = 0f;
-    private float attackDamage = 25f;
+    
     private string currentStateName;
 
     private static readonly int isWalkingHash = Animator.StringToHash("isWalking");
@@ -152,7 +153,7 @@ public class Player : MonoBehaviour
         CheckGroundStatus();
         stateMachine.Update();
         currentStateName = stateMachine.GetState().ToString();
-        Debug.Log(currentStateName);
+        //Debug.Log(currentStateName);
     }
 
     private void CheckGroundStatus()

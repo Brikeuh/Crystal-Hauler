@@ -10,7 +10,7 @@ public class ExtractionPoint : MonoBehaviour
     [SerializeField] private IntScriptableObject timerSO;
 
     [Header("Extraction Settings")]
-    [SerializeField] private float extractLimit = 5f;
+    [SerializeField] private int extractLimit = 5;
     [SerializeField] private PowerupType powerUp;
 
     private enum PowerupType { None, Speed, Time, Damage, Health }
@@ -23,6 +23,8 @@ public class ExtractionPoint : MonoBehaviour
     private float crystalsExtracted = 0f;
     private GameObject cave;
     private MeshRenderer caveMeshRenderer;
+
+    public int ExtractLimit => extractLimit;
     private void Start()
     {
         cave = this.transform.GetChild(1).gameObject;

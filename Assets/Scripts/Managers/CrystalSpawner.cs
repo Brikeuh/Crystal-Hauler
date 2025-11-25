@@ -6,6 +6,7 @@ public class CrystalSpawner : MonoBehaviour
     [Header("Spawn Settings")]
     [Tooltip("Crystal prefab to spawn")]
     public GameObject crystalPrefab;
+    public float maxYSpawnPosition = 10f;
 
     [Tooltip("Maximum number of crystals that can exist at once")]
     public int maxCrystals = 10;
@@ -39,7 +40,7 @@ public class CrystalSpawner : MonoBehaviour
     private float minDistanceFromPlayer = 12f;
 
     // Preferred distance from player (weighted towards this)
-    private float preferredDistanceFromPlayer = 20f;
+    private float preferredDistanceFromPlayer = 12f;
 
     // Height offset above terrain to spawn crystals
     private float spawnHeightOffset = 0.5f;
@@ -246,6 +247,10 @@ public class CrystalSpawner : MonoBehaviour
         {
             float distanceToPlayer = Vector3.Distance(new Vector3(position.x, player.position.y, position.z), player.position);
             if (distanceToPlayer < minDistanceFromPlayer)
+            {
+                return false;
+            }
+            else if (position.y >= maxYSpawnPosition)
             {
                 return false;
             }

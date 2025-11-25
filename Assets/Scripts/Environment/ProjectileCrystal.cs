@@ -5,7 +5,7 @@ public class ProjectileCrystal : MonoBehaviour
     [Header("Lifetime Settings")]
     public float maxLifetime = 5f;
     public float damage;
-
+  
     private void Start()
     {
         // Destroy after max lifetime even if it doesn't hit anything

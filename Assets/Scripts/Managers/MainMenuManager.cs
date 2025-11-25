@@ -24,8 +24,7 @@ public class MainMenuManager : MonoBehaviour
     public void StartGame()
     {
         // Load the first level or the level selection scene
-        gameManager.Load(GameManager.GameModeScene.UI);
-        gameManager.LoadAsync(GameManager.GameModeScene.EasyLevel);
+        gameManager.Load(GameManager.GameModeScene.LevelSelection);
     }
 
     public void QuitGame()

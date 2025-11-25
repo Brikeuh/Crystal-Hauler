@@ -1,15 +1,19 @@
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine;
+using System.Collections;
+using UnityEngine.EventSystems;
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
 
+    [Header("Scriptable Objects")]
     [SerializeField] private FloatScriptableObject scoreSO;
     [SerializeField] private FloatScriptableObject crystalCountSO;
     [SerializeField] private FloatScriptableObject playerHealthSO;
     [SerializeField] private FloatScriptableObject fillCircleAmountSO;
     [SerializeField] private IntScriptableObject timerSO;
+    [SerializeField] private IntScriptableObject enemiesDefeatedSO;
 
     [Header("HUD Elements")]
     public GameObject HUD;
@@ -18,13 +22,27 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI timerText;
     public GameObject loadCircle;
     public GameObject playerHealthProgressBar;
+    public GameObject CrystalParentGameObject;
 
-    [Header("Game Results UI Panels")]
+    [Header("Game Results UI References")]
+    public GameObject GameResultsPanel;
     public GameObject GameWinPanel;
     public GameObject GameLosePanel;
-    public GameObject GameQuitModal;
+    public GameObject postGameStats;
+    public TextMeshProUGUI timeRemainingResults;
+    public TextMeshProUGUI healthRemainingResults;
+    public TextMeshProUGUI enemiesDefeatedResults;
+    public TextMeshProUGUI crystalsExtractedResults;
+
+    [Header("Canvas References")]
+    public GameObject UICanvas;
+    public GameObject MainMenuCanvas;
+    public GameObject LevelSelectionCanvas;
+
+    [Header("Misc UI Elements")]
     public GameObject PauseMenu;
-    public GameObject CrystalParentGameObject;
+    public GameObject GameQuitModal;
+    public GameObject EventSystem;
 
     private GameObject[] childObjects;
     private Image loadCircleImage;
@@ -67,10 +85,22 @@ public class UIManager : MonoBehaviour
         playerHealthProgressBarImage = playerHealthProgressBar.GetComponent<Image>();
         childObjects = new GameObject[maxCrystals];
 
-        GameWinPanel.SetActive(false);
-        GameLosePanel.SetActive(false);
-        GameQuitModal.SetActive(false);
-        PauseMenu.SetActive(false);
+        UICanvas.SetActive(false);
+        MainMenuCanvas.SetActive(false);
+        LevelSelectionCanvas.SetActive(false);
+
+        EventSystem.SetActive(true);
+        
+
+        if (gameManager.GetScene("MainMenu"))
+        {
+            MainMenuCanvas.SetActive(true);
+        }
+        else if (gameManager.GetScene("EasyLevel") || gameManager.GetScene("MediumLevel") || gameManager.GetScene("HardLevel"))
+        {   
+            UICanvas.SetActive(true);
+            HUD.SetActive(true);
+        }
 
         SetupCrystalCountUI();
     }
@@ -90,13 +120,7 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    void DisplayTimer()
-    {
-        int minutes = timerSO.Value / 60;
-        int seconds = timerSO.Value % 60;
-        timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
-    }
-
+   
     public void SetTargetScore(int value)
     {
         targetScoreText.text = value.ToString();
@@ -106,6 +130,9 @@ public class UIManager : MonoBehaviour
     {
         HUD.SetActive(false);
 
+        UICanvas.SetActive(true);
+        GameResultsPanel.SetActive(true);
+
         if (result)
         {
             GameWinPanel.SetActive(true);
@@ -114,12 +141,109 @@ public class UIManager : MonoBehaviour
         {
             GameLosePanel.SetActive(true);
         }
+
+        postGameStats.SetActive(true);
+
+        timeRemainingResults.text = "Time Remaining: " + timerSO.Value + " seconds";
+        healthRemainingResults.text = "Health Remaining: " + playerHealthSO.Value;
+        enemiesDefeatedResults.text = "Enemies Defeated: " + enemiesDefeatedSO.Value;
+        crystalsExtractedResults.text = "Crystals Extracted: " + scoreSO.Value;
+    }
+    #region Public Helper Functions
+    public void StartGame()
+    {
+        gameManager.UnloadAsync(GameManager.GameModeScene.MainMenu);
+        MainMenuCanvas.SetActive(false);
+        LevelSelectionCanvas.SetActive(true);
+    }
+    public void OpenSettings()
+    {
+        gameManager.LoadAsync(GameManager.GameModeScene.Settings);
+    }
+    public void QuitGame()
+    {
+        gameManager.Quit();
+    }
+    public void RestartLevel()
+    {
+        gameManager.ReloadCurrentScene();  
+    }
+
+    public void ContinueToNextLevel()
+    {
+        //gameManager.LoadNextLevel();
+    }
+
+    public void LoadEasyLevel()
+    {
+        LevelSelectionCanvas.SetActive(false);
+        UICanvas.SetActive(true);
+        HUD.SetActive(true);
+        Cursor.lockState = CursorLockMode.Locked;
+        gameManager.LoadAsync(GameManager.GameModeScene.EasyLevel);
+    }
+
+    public void LoadMediumLevel()
+    {
+        LevelSelectionCanvas.SetActive(false);
+        UICanvas.SetActive(true);
+        HUD.SetActive(true);
+        Cursor.lockState = CursorLockMode.Locked;
+        gameManager.LoadAsync(GameManager.GameModeScene.MediumLevel);
+    }
+
+    public void LoadHardLevel()
+    {
+        LevelSelectionCanvas.SetActive(false);
+        UICanvas.SetActive(true);
+        HUD.SetActive(true);
+        Cursor.lockState = CursorLockMode.Locked;
+        gameManager.LoadAsync(GameManager.GameModeScene.HardLevel);
+    }
+
+    public void LoadTutorial()
+    {
+        LevelSelectionCanvas.SetActive(false);
+        UICanvas.SetActive(true);
+        HUD.SetActive(true);
+        Cursor.lockState = CursorLockMode.Locked;
+        gameManager.LoadAsync(GameManager.GameModeScene.Tutorial);
+    }
+
+    public void LoadMainMenu()
+    {
+        LevelSelectionCanvas.SetActive(false);
+
+        MainMenuCanvas.SetActive(true);
+        gameManager.LoadAsync(GameManager.GameModeScene.MainMenu);
+    }
+
+    public void QuitToMainMenu() // Only use from the modal
+    {
+        GameQuitModal.SetActive(false);
+        TogglePauseMenu();
+        UICanvas.SetActive(false);
+        HUD.SetActive(false);
+        gameManager.UnloadAsync(GameManager.GameModeScene.EasyLevel);
+
+        MainMenuCanvas.SetActive(true);
+        gameManager.LoadAsync(GameManager.GameModeScene.MainMenu);
+        Cursor.lockState = CursorLockMode.None;
+    }
+
+    public void QuitOptions()
+    {
+        GameQuitModal.SetActive(true);
+    }
+    public void ExitQuitModal()
+    {
+        GameQuitModal.SetActive(false);
     }
 
     public void TogglePauseMenu()
     {
         isPaused = !isPaused;
-        if(isPaused)
+        if (isPaused)
         {
             Time.timeScale = 0f;
             Cursor.lockState = CursorLockMode.None;
@@ -131,42 +255,21 @@ public class UIManager : MonoBehaviour
         }
         PauseMenu.SetActive(isPaused);
     }
+    #endregion
 
-    public void RestartLevel()
+    #region Private Helper Functions
+    private void DisplayTimer()
     {
-        gameManager.ReloadCurrentScene();
+        int minutes = timerSO.Value / 60;
+        int seconds = timerSO.Value % 60;
+        timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
     }
 
-    public void ContinueToNextLevel()
-    {
-        //gameManager.LoadNextLevel();
-    }
-
-    public void QuitOptions()
-    {
-        GameQuitModal.SetActive(true);
-    }
-
-    public void ExitQuitModal()
-    {
-        GameQuitModal.SetActive(false);
-    }
-
-    public void QuitToMainMenu()
-    {
-        gameManager.Load(GameManager.GameModeScene.MainMenu);
-    }
-
-    public void QuitGame()
-    {
-        gameManager.Quit();
-    }
-
-    void DisplayCrystals()
+    private void DisplayCrystals()
     {
         for (int i = 0; i < maxCrystals; i++)
         {
-            if(crystalCountSO.Value >= i + 1) 
+            if (crystalCountSO.Value >= i + 1)
             {
                 childObjects[i].SetActive(true);
             }
@@ -176,7 +279,8 @@ public class UIManager : MonoBehaviour
             }
         }
     }
-    void SetupCrystalCountUI() // Sets up an array with the child crystal game objects in the UI
+
+    private void SetupCrystalCountUI() // Sets up an array with the child crystal game objects in the UI
     {
         int childCount = CrystalParentGameObject.transform.childCount;
         for (int i = 0; i < childCount; i++)
@@ -186,5 +290,6 @@ public class UIManager : MonoBehaviour
 
         }
     }
+    #endregion
 
 }
