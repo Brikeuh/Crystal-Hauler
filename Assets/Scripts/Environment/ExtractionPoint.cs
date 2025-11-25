@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 public class ExtractionPoint : MonoBehaviour
@@ -13,8 +14,15 @@ public class ExtractionPoint : MonoBehaviour
     [SerializeField] private int extractLimit = 5;
     [SerializeField] private PowerupType powerUp;
 
+    [Header("Crystal Count Text References")]
+    [SerializeField] GameObject crystalLimitCanvas;
+    [SerializeField] TextMeshProUGUI currentCrystalsExtracted;
+    [SerializeField] TextMeshProUGUI crystalsExtractionLimit;
+
+
     private enum PowerupType { None, Speed, Time, Damage, Health }
 
+    [Header("Material")]
     public Material newMaterial;
 
     private float holdDuration;
@@ -34,6 +42,8 @@ public class ExtractionPoint : MonoBehaviour
     private void Update()
     {
         holdDuration = crystalCountSO.Value;
+        currentCrystalsExtracted.text = crystalsExtracted.ToString();
+        crystalsExtractionLimit.text = extractLimit.ToString();
     }
 
     private void OnTriggerStay(Collider other)
@@ -53,10 +63,21 @@ public class ExtractionPoint : MonoBehaviour
                     }
                     else if (fillCircleAmountSO.Value >= MaxImageFill)
                     {
+                        float crystalsAllowed = extractLimit - crystalsExtracted;
+
                         ClearFillCircle();
-                        scoreSO.Value += crystalCountSO.Value;
-                        crystalsExtracted += crystalCountSO.Value;
-                        crystalCountSO.Value = 0;
+                        if (crystalCountSO.Value > crystalsAllowed) 
+                        {
+                            scoreSO.Value += crystalsAllowed;
+                            crystalsExtracted += crystalsAllowed;
+                            crystalCountSO.Value -= crystalsAllowed;
+                        }
+                        else
+                        {
+                            scoreSO.Value += crystalCountSO.Value;
+                            crystalsExtracted += crystalCountSO.Value;
+                            crystalCountSO.Value = 0;
+                        }
                         player.CanExtract = false;
                     }
                 }
@@ -74,6 +95,7 @@ public class ExtractionPoint : MonoBehaviour
             {
                 this.GetComponent<Collider>().enabled = false;
                 caveMeshRenderer.material = newMaterial;
+                crystalLimitCanvas.SetActive(false);
                 ApplyPowerup(player);
             }
         }

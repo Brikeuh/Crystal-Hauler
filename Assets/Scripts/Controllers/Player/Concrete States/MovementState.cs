@@ -1,3 +1,5 @@
+using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class MovementState : PlayerBaseState
@@ -58,24 +60,37 @@ public class MovementState : PlayerBaseState
         {
             player.SetAnimatorBool(Player.IsWalkingHash, false);
         }
-        
-        if (player.RunPressed)
+
+        if (player.RunPressed && player.PlayerStamina > 0f)
         {
             player.SetAnimatorBool(Player.IsRunningHash, true);
             speed = player.MoveSpeed * player.RunModifier;
+            player.IsUsingStamina = true;
         }
-        else if (!player.RunPressed)
+        else
         {
             player.SetAnimatorBool(Player.IsRunningHash, false);
             speed = player.MoveSpeed;
+            player.IsUsingStamina = false;
         }
 
-        if (player.JumpPressed && player.IsGrounded && Time.time >= player.NextJumpTime)
+        if (player.RunPressed && player.PlayerStamina <= 0f)
+        {
+            player.PlayerStamina = -1f;
+        }
+
+        //if (player.JumpPressed && player.IsGrounded && Time.time >= player.NextJumpTime)
+        //{
+        //    player.SetAnimatorBool(Player.IsJumpingHash, true);
+        //    player.Jump();
+
+        //    player.NextJumpTime = Time.time + player.JumpCooldown;
+        //}
+
+        if (player.JumpPressed && player.IsGrounded && player.PlayerStamina > 1f)
         {
             player.SetAnimatorBool(Player.IsJumpingHash, true);
             player.Jump();
-
-            player.NextJumpTime = Time.time + player.JumpCooldown;
         }
         else
         {
@@ -111,6 +126,5 @@ public class MovementState : PlayerBaseState
             Quaternion targetRotation = Quaternion.LookRotation(rotationPosition);
             player.transform.rotation = Quaternion.Slerp(currentRotation, targetRotation, player.RotationRate * Time.deltaTime);
         } 
-        
     }
 }

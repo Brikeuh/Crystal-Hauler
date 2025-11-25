@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine;
 using System.Collections;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
@@ -11,6 +12,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private FloatScriptableObject scoreSO;
     [SerializeField] private FloatScriptableObject crystalCountSO;
     [SerializeField] private FloatScriptableObject playerHealthSO;
+    [SerializeField] private FloatScriptableObject playerStaminaSO;
     [SerializeField] private FloatScriptableObject fillCircleAmountSO;
     [SerializeField] private IntScriptableObject timerSO;
     [SerializeField] private IntScriptableObject enemiesDefeatedSO;
@@ -23,6 +25,8 @@ public class UIManager : MonoBehaviour
     public GameObject loadCircle;
     public GameObject playerHealthProgressBar;
     public GameObject CrystalParentGameObject;
+    public GameObject StaminaBarGameObject;
+    public Image CurrentStaminaBarImage;
 
     [Header("Game Results UI References")]
     public GameObject GameResultsPanel;
@@ -39,6 +43,10 @@ public class UIManager : MonoBehaviour
     public GameObject MainMenuCanvas;
     public GameObject LevelSelectionCanvas;
 
+    [Header("Select UI References")]
+    [SerializeField] private EventSystem eventSystem;
+    [SerializeField] private Selectable pauseMenuResumeButtonElement;
+
     [Header("Misc UI Elements")]
     public GameObject PauseMenu;
     public GameObject GameQuitModal;
@@ -50,6 +58,9 @@ public class UIManager : MonoBehaviour
     private GameManager gameManager;
     private bool isPaused = false;
     private int maxCrystals = 5;
+
+    private InputAction pauseInput;
+    private InputAction jumpInput;
 
     private void Awake()
     {
@@ -90,7 +101,9 @@ public class UIManager : MonoBehaviour
         LevelSelectionCanvas.SetActive(false);
 
         EventSystem.SetActive(true);
-        
+
+        pauseInput = InputSystem.actions.FindAction("UI/PauseGame");
+        jumpInput = InputSystem.actions.FindAction("Player/Jump");
 
         if (gameManager.GetScene("MainMenu"))
         {
@@ -113,10 +126,20 @@ public class UIManager : MonoBehaviour
         playerHealthProgressBarImage.fillAmount = playerHealthSO.Value / 100f;
         DisplayTimer();
         loadCircleImage.fillAmount = fillCircleAmountSO.Value;
+        CurrentStaminaBarImage.fillAmount = playerStaminaSO.Value / 5f;
 
-        if (Input.GetKeyDown(KeyCode.P))
+        if (pauseInput.WasReleasedThisFrame())
         {
             TogglePauseMenu();
+        }
+
+        if (playerStaminaSO.Value >= 5f)
+        {
+            StaminaBarGameObject.SetActive(false);
+        }
+        else
+        {
+            StaminaBarGameObject.SetActive(true);
         }
     }
 
@@ -243,15 +266,18 @@ public class UIManager : MonoBehaviour
     public void TogglePauseMenu()
     {
         isPaused = !isPaused;
+        jumpInput.Disable();
         if (isPaused)
         {
             Time.timeScale = 0f;
             Cursor.lockState = CursorLockMode.None;
+            eventSystem.SetSelectedGameObject(pauseMenuResumeButtonElement.gameObject);
         }
         else
         {
             Time.timeScale = 1f;
             Cursor.lockState = CursorLockMode.Locked;
+            jumpInput.Enable();
         }
         PauseMenu.SetActive(isPaused);
     }
@@ -292,4 +318,17 @@ public class UIManager : MonoBehaviour
     }
     #endregion
 
+    public void JumpToElement()
+    {
+        if (eventSystem == null)
+        {
+            Debug.Log("Event System is not referenced or does not exist in the current context", this);
+        }
+        if (pauseMenuResumeButtonElement == null)
+        {
+            Debug.Log("Element to jump to is not referenced or does not exist in the current context", this);
+        }
+
+        eventSystem.SetSelectedGameObject(pauseMenuResumeButtonElement.gameObject);
+    }
 }

@@ -8,6 +8,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private FloatScriptableObject scoreSO;
     [SerializeField] private FloatScriptableObject crystalCountSO;
     [SerializeField] private FloatScriptableObject playerHealthSO;
+    [SerializeField] private FloatScriptableObject playerStaminaSO;
     [SerializeField] private IntScriptableObject timerSO;
     [SerializeField] private IntScriptableObject enemiesDefeatedSO;
 

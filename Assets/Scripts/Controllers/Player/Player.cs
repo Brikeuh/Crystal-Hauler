@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -8,10 +9,12 @@ public class Player : MonoBehaviour
     [Header("Player Properties")]
     [SerializeField] private float maxHealth = 100f;
     [SerializeField] private float attackDamage = 25f;
+    [SerializeField] private float maxStamina = 5f;
+    [SerializeField] private float playerStamina;
 
     [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 5f;
-    [SerializeField] private float runModifier = 1.5f;
+    [SerializeField] private float runModifier = 2.5f;
     [SerializeField] private float rotationRate = 15.0f;
     [SerializeField] private float jumpForce = 5f;
     [SerializeField] private float jumpCooldown = 2f;
@@ -33,6 +36,7 @@ public class Player : MonoBehaviour
     [SerializeField] private FloatScriptableObject crystalCountSO;
     [SerializeField] private FloatScriptableObject fillCircleAmountSO;
     [SerializeField] private FloatScriptableObject playerHealthSO;
+    [SerializeField] private FloatScriptableObject playerStaminaSO;
 
     private CharacterController controller;
     private Animator animator;
@@ -55,9 +59,11 @@ public class Player : MonoBehaviour
     private bool interactPressed;
     private bool attackPressed;
     private bool attackFinished; // helper bool that is called when the attack animation is completed.
+    private bool isUsingStamina;
 
     private float nextJumpTime = 0f;
-    
+    private float incrementor;
+    private float decrementor;
     private string currentStateName;
 
     private static readonly int isWalkingHash = Animator.StringToHash("isWalking");
@@ -79,11 +85,14 @@ public class Player : MonoBehaviour
     public bool AttackFinished { get => attackFinished; set => attackFinished = value; }
     public bool CanPickup { get => canPickup; set => canPickup = value; }
     public bool CanExtract { get => canExtract; set => canExtract = value; }
+    public bool IsUsingStamina { get => isUsingStamina; set => isUsingStamina = value; }
     public float CrystalCount { get => crystalCountSO.Value; set => crystalCountSO.Value = value; }
     public float FillCircleAmount => fillCircleAmountSO.Value;
     public float MoveSpeed { get => moveSpeed; set => moveSpeed = value; }
     public float AttackDamage { get => attackDamage; set => attackDamage = value; }
     public float MaxHealth { get => maxHealth; set => maxHealth = value; }
+    public float MaxStamina { get => maxStamina; set => maxStamina = value; }
+    public float PlayerStamina { get => playerStamina; set => playerStamina = value; }
     public float RunModifier => runModifier;
     public float JumpForce => jumpForce;
     public float JumpCooldown => jumpCooldown;
@@ -144,6 +153,9 @@ public class Player : MonoBehaviour
         attackInput = InputSystem.actions.FindAction("Player/Attack");
 
         playerHealthSO.Value = maxHealth;
+        playerStaminaSO.Value = maxStamina;
+
+        isUsingStamina = false;
     }
 
     // Update is called once per frame
@@ -152,8 +164,10 @@ public class Player : MonoBehaviour
         UpdateMovementInput();
         CheckGroundStatus();
         stateMachine.Update();
-        currentStateName = stateMachine.GetState().ToString();
+        //currentStateName = stateMachine.GetState().ToString();
         //Debug.Log(currentStateName);
+
+        HandleStamina();
     }
 
     private void CheckGroundStatus()
@@ -184,6 +198,7 @@ public class Player : MonoBehaviour
 
     public void Jump()
     {
+        playerStamina -= 1f;
         velocity.y = Mathf.Sqrt(jumpForce * 2f * -gravity);
     }
 
@@ -241,6 +256,25 @@ public class Player : MonoBehaviour
         Debug.Log("The Player Attacked!");
         LaunchProjectile();
         crystalCountSO.Value--;
+    }
+
+    private void HandleStamina()
+    {
+        if (isUsingStamina)
+        {
+            if (playerStamina >= 0f)
+            {
+                playerStamina -= Time.deltaTime / 1f;
+            }
+        }
+        else if (!isUsingStamina)
+        {
+            if (playerStamina < maxStamina)
+            {
+                playerStamina += Time.deltaTime * 2f / 1f;
+            }
+        }
+        playerStaminaSO.Value = playerStamina;
     }
 
     private void LaunchProjectile()
