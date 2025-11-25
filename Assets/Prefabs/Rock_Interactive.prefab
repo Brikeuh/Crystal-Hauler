@@ -122,7 +122,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 543d8cd77362812489941f0e723989f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rockMesh: {fileID: 0}
+  rockMesh: {fileID: 2849157558306176687}
   bugPrefab: {fileID: 3830267468840380983, guid: 3021f08f0470eb9449a6ca5c42daccfc, type: 3}
   bugSpawnPoint: {fileID: 6870902813357797710}
   triggerDistance: 4
