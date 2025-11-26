@@ -8,9 +8,10 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private FloatScriptableObject scoreSO;
     [SerializeField] private FloatScriptableObject crystalCountSO;
     [SerializeField] private FloatScriptableObject playerHealthSO;
-    [SerializeField] private FloatScriptableObject playerStaminaSO;
+    [SerializeField] private FloatScriptableObject levelPointGoalSO;
     [SerializeField] private IntScriptableObject timerSO;
     [SerializeField] private IntScriptableObject enemiesDefeatedSO;
+    [SerializeField] private BoolValue levelEndedSO;
 
     [Header("Level Attributes")]
     [SerializeField] private int levelDuration = 60;
@@ -44,11 +45,13 @@ public class LevelManager : MonoBehaviour
         playerHealthSO.Value = 100f;
         timerSO.Value = levelDuration;
         enemiesDefeatedSO.Value = 0;
-
-        targetScore = CalculateMaxScore(GetExtractionPointChildren());
+        levelEndedSO.Value = false;
+        levelPointGoalSO.Value = CalculateMaxScore(GetExtractionPointChildren());
         //Debug.Log(targetScore);
 
-        uiManager.SetTargetScore(targetScore);
+        SoundManager.Instance.PlayMainMenuSound();
+
+        uiManager.SetTargetScore((int)levelPointGoalSO.Value);
         StartCoroutine(StartCountdown());
     }
 
@@ -59,12 +62,14 @@ public class LevelManager : MonoBehaviour
 
     void CheckGameState()
     {
-        if (scoreSO.Value >= targetScore)
+        if (scoreSO.Value >= levelPointGoalSO.Value)
         {
+            SoundManager.Instance.PlaySound(SoundNames.LevelWon, SoundType.BackGround, 0.7f, false);
             EndLevel(true); 
         }
         else if (playerHealthSO.Value <= 0f || timerSO.Value <= 0)
         {
+            SoundManager.Instance.PlaySound(SoundNames.LevelLost, SoundType.BackGround, 0.7f, false);
             EndLevel(false);
         }
     }
@@ -73,7 +78,9 @@ public class LevelManager : MonoBehaviour
     {
         Time.timeScale = 0f;
         Cursor.lockState = CursorLockMode.None;
+        //SoundManager.Instance.StopSound(SoundType.BackGround);
 
+        levelEndedSO.Value = true;
         uiManager.ShowGameResults(result);
         this.enabled = false; // Disable further updates
     }

@@ -76,8 +76,8 @@ MonoBehaviour:
   fillCircleAmountSO: {fileID: 11400000, guid: b7860114248f2264ab932b22c2bc1656, type: 2}
   playerHealthSO: {fileID: 11400000, guid: 871fa7513534db84d9b2f6a2ca7a1372, type: 2}
   timerSO: {fileID: 11400000, guid: fddfafbda97712245b32edb0692f8562, type: 2}
-  extractLimit: 5
-  powerUp: 0
+  extractLimit: 7
+  powerUp: 3
   crystalLimitCanvas: {fileID: 6075012757147113935}
   currentCrystalsExtracted: {fileID: 8475237417460176093}
   crystalsExtractionLimit: {fileID: 5390817688790111457}

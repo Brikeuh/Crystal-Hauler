@@ -17,6 +17,7 @@ public class MainMenuManager : MonoBehaviour
     }
     void Start()
     {
+        SoundManager.Instance.PlayMainMenuSound();
         Cursor.lockState = CursorLockMode.None;
         Time.timeScale = 0f;
     }

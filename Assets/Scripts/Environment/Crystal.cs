@@ -34,6 +34,7 @@ public class Crystal : MonoBehaviour
                     }
                     else if (fillCircleAmountSO.Value >= MaxImageFill) // If the holdTime is completed, add a crystal to the player
                     {
+                        SoundManager.Instance.PlaySound(SoundNames.CrystalPicked, SoundType.Effect, 0.7f, false);
                         Destroy(gameObject);
                         ClearFillCircle();
                         crystalCountSO.Value++;

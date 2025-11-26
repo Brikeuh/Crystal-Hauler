@@ -4357,7 +4357,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 100
-  attackDamage: 25
+  attackDamage: 50
   maxStamina: 5
   playerStamina: 5
   moveSpeed: 3
@@ -4380,6 +4380,7 @@ MonoBehaviour:
   fillCircleAmountSO: {fileID: 11400000, guid: b7860114248f2264ab932b22c2bc1656, type: 2}
   playerHealthSO: {fileID: 11400000, guid: 871fa7513534db84d9b2f6a2ca7a1372, type: 2}
   playerStaminaSO: {fileID: 11400000, guid: ec4edf248a9282248bca616a173c4392, type: 2}
+  playerDamageSO: {fileID: 11400000, guid: c47ab9c7f5dda6c40bd77b7b98473cdb, type: 2}
 --- !u!1001 &1204402157
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4693,7 +4694,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1259478406}
   - component: {fileID: 1259478405}
-  - component: {fileID: 1259478404}
   - component: {fileID: 1259478407}
   - component: {fileID: 1259478408}
   - component: {fileID: 1259478409}
@@ -4704,14 +4704,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &1259478404
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1259478403}
-  m_Enabled: 1
 --- !u!20 &1259478405
 Camera:
   m_ObjectHideFlags: 0
@@ -6972,10 +6964,11 @@ MonoBehaviour:
   scoreSO: {fileID: 11400000, guid: beadc8a967e2d2e41bcd034c0391c035, type: 2}
   crystalCountSO: {fileID: 11400000, guid: 2e17ce122a3a2224f965a6ea4d8e41ca, type: 2}
   playerHealthSO: {fileID: 11400000, guid: 871fa7513534db84d9b2f6a2ca7a1372, type: 2}
-  playerStaminaSO: {fileID: 0}
+  levelPointGoalSO: {fileID: 11400000, guid: f59f238ad3b7d1d4faacacf85d9d66c0, type: 2}
   timerSO: {fileID: 11400000, guid: fddfafbda97712245b32edb0692f8562, type: 2}
   enemiesDefeatedSO: {fileID: 11400000, guid: a13d77601758fe340942d651969a03a4, type: 2}
-  levelDuration: 180
+  levelEndedSO: {fileID: 11400000, guid: 1b9280f8c7861ce459013209687a4c65, type: 2}
+  levelDuration: 210
   extractionPoints: {fileID: 1000162777}
 --- !u!154 &622281553760148744
 TerrainCollider:

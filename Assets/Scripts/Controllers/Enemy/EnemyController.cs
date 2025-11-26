@@ -1,5 +1,6 @@
 using JetBrains.Annotations;
 using System.Collections;
+using TMPro;
 using Unity.Services.Analytics;
 using UnityEngine;
 using UnityEngine.AI;
@@ -11,6 +12,7 @@ public class EnemyController : MonoBehaviour
     private Transform playerTransform;
     private Terrain terrain;
     public Image healthBarImage;
+    public TextMeshProUGUI healthPoints;
 
     [Header("Character Stats")]
     [SerializeField] private float health = 100f;
@@ -76,6 +78,7 @@ public class EnemyController : MonoBehaviour
         animator = GetComponent<Animator>();
         hurtBox = this.transform.GetChild(0).gameObject;
         stateIndicator = this.transform.GetChild(1).GetComponent<Renderer>();
+        healthPoints.text = health.ToString();
 
         runSpeed = speed * runModifier;
         navMeshAgent.speed = speed;
@@ -324,12 +327,14 @@ public class EnemyController : MonoBehaviour
 
     public void TakeDamage(float damageAmount)
     {
+        SoundManager.Instance.PlaySound(SoundNames.EnemyHurt, SoundType.UISource, 0.7f, false);
         health -= damageAmount;
         if (health <= 0)
         {
             animator.SetBool("isDead", true);
         }
         healthBarImage.fillAmount = health / 100f;
+        healthPoints.text = health.ToString();
         StartCoroutine(StunCountdown());
         Debug.Log($"{gameObject.name} took {damageAmount} damage. Current health: {health}");
     }
@@ -439,5 +444,10 @@ public class EnemyController : MonoBehaviour
         navMeshAgent.speed = speed;
         navMeshAgent.isStopped = false;
         animator.SetBool("isStunned", false);
+    }
+
+    public void PlayAttackSound()
+    {
+        SoundManager.Instance.PlaySound(SoundNames.EnemyAttack, SoundType.UISource, 0.7f, false);
     }
 }

@@ -10,13 +10,23 @@ public class BackgroundSound
 
 public class SoundManager : MonoBehaviour
 {
+    [Header("Background Music")]
     public List<BackgroundSound> MainMenuBgSounds;
     public List<BackgroundSound> GamePlayBgSounds;
+
+    [Header("Volume Settings")]
     public float MusicVolume;
     public float SoundVolume;
-    public static SoundManager Instance;
-    public AudioSource BGSource, EffectsSource, UISource;
+
+    [Header("Audio Sources")]
+    public AudioSource BGSource;
+    public AudioSource EffectsSource;
+    public AudioSource UISource;
+
+    [Header("Game Sounds")]
     public Sounds[] gameSounds;
+
+    public static SoundManager Instance;
 
     private void Awake()
     {
@@ -36,17 +46,17 @@ public class SoundManager : MonoBehaviour
         SoundVolume = PlayerPrefs.GetFloat("soundValue", 1);
     }
 
-    private void OnEnable() { }
-    private void OnDisable() { }
-
-    public void UpdateSound(float v)
+    public void UpdateSound(float volume)
     {
-        SoundVolume = v;
+        SoundVolume = volume;
+        PlayerPrefs.SetFloat("soundValue", volume);
     }
 
-    public void UpdateMusic(float v)
+    public void UpdateMusic(float volume)
     {
-        Debug.Log("NEW MUSIC:" + v);
+        MusicVolume = volume;
+        BGSource.volume = volume;
+        Debug.Log("New Music Volume: " + volume);
     }
 
     public void PlayButtonSound()
@@ -54,56 +64,82 @@ public class SoundManager : MonoBehaviour
         PlaySound(SoundNames.ButtonClick, SoundType.Effect);
     }
 
-    public void OnGameStart() { }
-
     public void PlaySound(SoundNames name, SoundType type, float volumeScale = 1f, bool isLooping = false)
     {
+        // Apply volume scaling for effects and UI
         if (type == SoundType.Effect || type == SoundType.UISource)
-            volumeScale = volumeScale * SoundVolume;
+        {
+            volumeScale *= SoundVolume;
+        }
 
-        if (type == SoundType.BackGround)
+        switch (type)
         {
-            BGSource.clip = gameSounds[(int)name].clip;
-            BGSource.loop = isLooping;
-            BGSource.Play();
-        }
-        else if (type == SoundType.Effect)
-        {
-            EffectsSource.loop = isLooping;
-            EffectsSource.clip = gameSounds[(int)name].clip;
-            EffectsSource.Play();
-        }
-        else if (type == SoundType.UISource)
-        {
-            UISource.clip = gameSounds[(int)name].clip;
-            UISource.Play();
+            case SoundType.BackGround:
+                BGSource.clip = gameSounds[(int)name].clip;
+                BGSource.loop = isLooping;
+                BGSource.Play();
+                break;
+
+            case SoundType.Effect:
+                EffectsSource.loop = isLooping;
+                EffectsSource.volume = volumeScale;
+                EffectsSource.clip = gameSounds[(int)name].clip;
+                EffectsSource.Play();
+                break;
+
+            case SoundType.UISource:
+                UISource.volume = volumeScale;
+                UISource.clip = gameSounds[(int)name].clip;
+                UISource.Play();
+                break;
         }
     }
 
-    private void Update() { }
-
     public void StopSound(SoundType type)
     {
-        if (type == SoundType.BackGround) BGSource.Stop();
-        else if (type == SoundType.Effect) EffectsSource.Stop();
-        else if (type == SoundType.UISource) UISource.Stop();
+        switch (type)
+        {
+            case SoundType.BackGround:
+                BGSource.Stop();
+                break;
+
+            case SoundType.Effect:
+                EffectsSource.Stop();
+                break;
+
+            case SoundType.UISource:
+                UISource.Stop();
+                break;
+        }
     }
 
     public void PlayGameplaySound()
     {
-        if (GamePlayBgSounds == null || GamePlayBgSounds.Count == 0) return;
-        BackgroundSound c = GamePlayBgSounds[UnityEngine.Random.Range(0, GamePlayBgSounds.Count)];
-        BGSource.clip = c.ClipName;
-        BGSource.volume = c.Volume;
+        if (GamePlayBgSounds == null || GamePlayBgSounds.Count == 0)
+        {
+            Debug.LogWarning("No gameplay background sounds assigned!");
+            return;
+        }
+
+        BackgroundSound randomSound = GamePlayBgSounds[Random.Range(0, GamePlayBgSounds.Count)];
+        BGSource.clip = randomSound.ClipName;
+        BGSource.volume = randomSound.Volume;
+        BGSource.loop = true;
         BGSource.Play();
     }
 
     public void PlayMainMenuSound()
     {
-        if (MainMenuBgSounds == null || MainMenuBgSounds.Count == 0) return;
-        BackgroundSound c = MainMenuBgSounds[UnityEngine.Random.Range(0, MainMenuBgSounds.Count)];
-        BGSource.volume = c.Volume;
-        BGSource.clip = c.ClipName;
+        if (MainMenuBgSounds == null || MainMenuBgSounds.Count == 0)
+        {
+            Debug.LogWarning("No main menu background sounds assigned!");
+            return;
+        }
+
+        BackgroundSound randomSound = MainMenuBgSounds[Random.Range(0, MainMenuBgSounds.Count)];
+        BGSource.volume = randomSound.Volume;
+        BGSource.clip = randomSound.ClipName;
+        BGSource.loop = true;
         BGSource.Play();
     }
 }
@@ -118,17 +154,19 @@ public struct Sounds
 public enum SoundNames
 {
     ButtonClick,
-    LevelFail,
-    LevelComplete,
     CrystalPicked,
     CrystalPlaced,
-BuzzerSound
+    LevelWon,
+    LevelLost,
+    PlayerHurt,
+    PlayerAttack,
+    EnemyHurt,
+    EnemyAttack
 }
 
 public enum SoundType
 {
     BackGround,
     Effect,
-    UISource,
-    Collision
+    UISource
 }

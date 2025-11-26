@@ -65,6 +65,7 @@ public class ExtractionPoint : MonoBehaviour
                     {
                         float crystalsAllowed = extractLimit - crystalsExtracted;
 
+                        SoundManager.Instance.PlaySound(SoundNames.CrystalPlaced, SoundType.Effect, 0.7f, false);
                         ClearFillCircle();
                         if (crystalCountSO.Value > crystalsAllowed) 
                         {

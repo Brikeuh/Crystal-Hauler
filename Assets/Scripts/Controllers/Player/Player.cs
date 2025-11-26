@@ -37,6 +37,7 @@ public class Player : MonoBehaviour
     [SerializeField] private FloatScriptableObject fillCircleAmountSO;
     [SerializeField] private FloatScriptableObject playerHealthSO;
     [SerializeField] private FloatScriptableObject playerStaminaSO;
+    [SerializeField] private FloatScriptableObject playerDamageSO;
 
     private CharacterController controller;
     private Animator animator;
@@ -168,6 +169,8 @@ public class Player : MonoBehaviour
         //Debug.Log(currentStateName);
 
         HandleStamina();
+
+        playerDamageSO.Value = attackDamage;
     }
 
     private void CheckGroundStatus()
@@ -234,6 +237,7 @@ public class Player : MonoBehaviour
 
     public void TakeDamage(float damageAmount)
     {
+        SoundManager.Instance.PlaySound(SoundNames.PlayerHurt, SoundType.Effect, 0.7f, false);
         playerHealthSO.Value -= damageAmount;
         if (playerHealthSO.Value <= 0)
         {
@@ -255,6 +259,7 @@ public class Player : MonoBehaviour
         // Instantiate a crystal that rotates and has a force applied to it and a hurtbox.
         Debug.Log("The Player Attacked!");
         LaunchProjectile();
+        SoundManager.Instance.PlaySound(SoundNames.PlayerAttack, SoundType.Effect, 0.7f, false);
         crystalCountSO.Value--;
     }
 

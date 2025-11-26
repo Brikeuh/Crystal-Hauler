@@ -1,9 +1,11 @@
-using TMPro;
-using UnityEngine.UI;
-using UnityEngine;
 using System.Collections;
+using TMPro;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.SocialPlatforms.Impl;
+using UnityEngine.UI;
+using static GameManager;
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
@@ -16,12 +18,14 @@ public class UIManager : MonoBehaviour
     [SerializeField] private FloatScriptableObject fillCircleAmountSO;
     [SerializeField] private IntScriptableObject timerSO;
     [SerializeField] private IntScriptableObject enemiesDefeatedSO;
+    [SerializeField] private FloatScriptableObject playerDamageSO;
 
     [Header("HUD Elements")]
     public GameObject HUD;
     public TextMeshProUGUI currentScoreText;
     public TextMeshProUGUI targetScoreText;
     public TextMeshProUGUI timerText;
+    public TextMeshProUGUI attackDamage;
     public GameObject loadCircle;
     public GameObject playerHealthProgressBar;
     public GameObject CrystalParentGameObject;
@@ -32,6 +36,7 @@ public class UIManager : MonoBehaviour
     public GameObject GameResultsPanel;
     public GameObject GameWinPanel;
     public GameObject GameLosePanel;
+    public GameObject GameResultsQuitButton; // shared quit button between the two possible game results panels
     public GameObject postGameStats;
     public TextMeshProUGUI timeRemainingResults;
     public TextMeshProUGUI healthRemainingResults;
@@ -97,6 +102,7 @@ public class UIManager : MonoBehaviour
         childObjects = new GameObject[maxCrystals];
 
         UICanvas.SetActive(false);
+        GameResultsPanel.SetActive(false);
         MainMenuCanvas.SetActive(false);
         LevelSelectionCanvas.SetActive(false);
 
@@ -112,6 +118,7 @@ public class UIManager : MonoBehaviour
         else if (gameManager.GetScene("EasyLevel") || gameManager.GetScene("MediumLevel") || gameManager.GetScene("HardLevel"))
         {   
             UICanvas.SetActive(true);
+            PauseMenu.SetActive(false);
             HUD.SetActive(true);
         }
 
@@ -127,6 +134,7 @@ public class UIManager : MonoBehaviour
         DisplayTimer();
         loadCircleImage.fillAmount = fillCircleAmountSO.Value;
         CurrentStaminaBarImage.fillAmount = playerStaminaSO.Value / 5f;
+        attackDamage.text = playerDamageSO.Value.ToString();
 
         if (pauseInput.WasReleasedThisFrame())
         {
@@ -155,16 +163,16 @@ public class UIManager : MonoBehaviour
 
         UICanvas.SetActive(true);
         GameResultsPanel.SetActive(true);
-
+        
         if (result)
         {
             GameWinPanel.SetActive(true);
         }
         else if (!result)
         {
+            Debug.Log(result);
             GameLosePanel.SetActive(true);
         }
-
         postGameStats.SetActive(true);
 
         timeRemainingResults.text = "Time Remaining: " + timerSO.Value + " seconds";
@@ -194,7 +202,11 @@ public class UIManager : MonoBehaviour
 
     public void ContinueToNextLevel()
     {
-        //gameManager.LoadNextLevel();
+        UnloadLevels();
+        GameWinPanel.SetActive(false);
+        GameResultsPanel.SetActive(false);
+
+        LevelSelectionCanvas.SetActive(true);
     }
 
     public void LoadEasyLevel()
@@ -203,7 +215,7 @@ public class UIManager : MonoBehaviour
         UICanvas.SetActive(true);
         HUD.SetActive(true);
         Cursor.lockState = CursorLockMode.Locked;
-        gameManager.LoadAsync(GameManager.GameModeScene.EasyLevel);
+        gameManager.LoadAsync(GameModeScene.EasyLevel);
     }
 
     public void LoadMediumLevel()
@@ -212,7 +224,7 @@ public class UIManager : MonoBehaviour
         UICanvas.SetActive(true);
         HUD.SetActive(true);
         Cursor.lockState = CursorLockMode.Locked;
-        gameManager.LoadAsync(GameManager.GameModeScene.MediumLevel);
+        gameManager.LoadAsync(GameModeScene.MediumLevel);
     }
 
     public void LoadHardLevel()
@@ -221,7 +233,7 @@ public class UIManager : MonoBehaviour
         UICanvas.SetActive(true);
         HUD.SetActive(true);
         Cursor.lockState = CursorLockMode.Locked;
-        gameManager.LoadAsync(GameManager.GameModeScene.HardLevel);
+        gameManager.LoadAsync(GameModeScene.HardLevel);
     }
 
     public void LoadTutorial()
@@ -230,7 +242,7 @@ public class UIManager : MonoBehaviour
         UICanvas.SetActive(true);
         HUD.SetActive(true);
         Cursor.lockState = CursorLockMode.Locked;
-        gameManager.LoadAsync(GameManager.GameModeScene.Tutorial);
+        gameManager.LoadAsync(GameModeScene.Tutorial);
     }
 
     public void LoadMainMenu()
@@ -238,19 +250,21 @@ public class UIManager : MonoBehaviour
         LevelSelectionCanvas.SetActive(false);
 
         MainMenuCanvas.SetActive(true);
-        gameManager.LoadAsync(GameManager.GameModeScene.MainMenu);
+        gameManager.LoadAsync(GameModeScene.MainMenu);
     }
 
     public void QuitToMainMenu() // Only use from the modal
     {
         GameQuitModal.SetActive(false);
-        TogglePauseMenu();
+        //TogglePauseMenu();
         UICanvas.SetActive(false);
         HUD.SetActive(false);
-        gameManager.UnloadAsync(GameManager.GameModeScene.EasyLevel);
+        GameWinPanel.SetActive(false);
+        GameLosePanel.SetActive(false);
+        UnloadLevels();
 
         MainMenuCanvas.SetActive(true);
-        gameManager.LoadAsync(GameManager.GameModeScene.MainMenu);
+        gameManager.LoadAsync(GameModeScene.MainMenu);
         Cursor.lockState = CursorLockMode.None;
     }
 
@@ -280,6 +294,7 @@ public class UIManager : MonoBehaviour
             jumpInput.Enable();
         }
         PauseMenu.SetActive(isPaused);
+        Debug.Log("Pause Toggle Pressed");
     }
     #endregion
 
@@ -330,5 +345,25 @@ public class UIManager : MonoBehaviour
         }
 
         eventSystem.SetSelectedGameObject(pauseMenuResumeButtonElement.gameObject);
+    }
+
+    public void PlayButtonClickSound()
+    {
+        SoundManager.Instance.PlaySound(SoundNames.ButtonClick, SoundType.UISource, 0.7f, false);
+    }
+    public void UnloadLevels() // unloads the currently active level
+    {
+        if (gameManager.GetScene(GameModeScene.EasyLevel.ToString()))
+        {
+            gameManager.UnloadAsync(GameModeScene.EasyLevel);
+        }
+        else if (gameManager.GetScene(GameModeScene.MediumLevel.ToString()))
+        {
+            gameManager.UnloadAsync(GameModeScene.MediumLevel);
+        }
+        else if (gameManager.GetScene(GameModeScene.HardLevel.ToString()))
+        {
+            gameManager.UnloadAsync(GameModeScene.HardLevel);
+        }
     }
 }
